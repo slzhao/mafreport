@@ -33,10 +33,14 @@ plotTiTv(res = mafContent.titv,showBarcodes=TRUE)
 ```
 
 
-### Rainfall plots
+<!-- ### Rainfall plots -->
 ```{r,fig.width=9}
-rainfallPlot(maf = dataForReport[["maf"]],ref.build=dataForReport[["genome"]])
+if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
+  cat("### Rainfall plots\n")
+  rainfallPlot(maf = dataForReport[["maf"]],ref.build=dataForReport[["genome"]])
+}
 ```
+
 
 ### Compare mutation load against TCGA cohorts
 ```{r,results='markup'}
