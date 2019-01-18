@@ -1,0 +1,42 @@
+
+# Summary Tables
+## Overall Summary
+```{r}
+kable(dataForReport[["maf"]]@summary)
+```
+
+## Silent Variants Summary (Removed)
+```{r}
+if ("vc_nonSyn" %in% names(dataForReport)) {
+  kable(summarySilentMaf(dataForReport[["maf"]]@maf.silent,vc.nonSilent=dataForReport[["vc_nonSyn"]]))
+} else {
+  kable(summarySilentMaf(dataForReport[["maf"]]@maf.silent))
+}
+
+```
+
+## Variants Classification
+```{r}
+#gvisTable(dataForReport[["maf"]]@variant.classification.summary,options=tableVisOptions)
+makeDataTable(dataForReport[["maf"]]@variant.classification.summary)
+```
+
+## Variants Type
+```{r}
+#gvisTable(dataForReport[["maf"]]@variant.type.summary,options=tableVisOptions)
+makeDataTable(dataForReport[["maf"]]@variant.type.summary)
+```
+
+## High Prevelance Variants
+```{r}
+#makeDataTable(summaryVariant(dataForReport[["maf"]],vIdCol=dataForReport[["vIdCol"]])[1:200,])
+makeDataTable(dataForReport[["mafProcessed"]]$variantCountSummary[1:200,])
+```
+
+## Variants Per Gene
+```{r}
+#gvisTable(dataForReport[["maf"]]@gene.summary,options=tableVisOptions)
+makeDataTable(dataForReport[["maf"]]@gene.summary)
+```
+
+

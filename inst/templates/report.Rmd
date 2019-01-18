@@ -1,0 +1,54 @@
+---
+title: "Variants Report"
+author: "Shilin Zhao<br><small>Department of Biostatistics<br>Vanderbilt University School of Medicine</small>"
+date: "<small>`r Sys.Date()`</small>"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 3
+    number_sections: false
+    self_contained: no
+    toc_float: 
+      collapsed: true
+    code_folding: hide
+    # theme: cerulean
+    # keep_md: true
+description: "MAF Variants Report"
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+
+knitr::opts_chunk$set(echo = dataForReport[["showCode"]],results='asis')
+options(width = 3000)
+```
+
+
+```{r,include=FALSE}
+reportTemplates=dataForReport[["reportTemplates"]]
+out = NULL
+
+for (i in 1:length(reportTemplates)) {
+  rmdFile=reportTemplates[i]
+  if (file.exists(rmdFile)) {
+    out = c(out, knit_child(rmdFile))
+  } else {
+    warning(paste0("File ",rmdFile," defined in reportTemplates but doesn't exist."))
+  }
+  
+}
+
+
+```
+
+`r paste(knit(text = out), collapse = '\n')`
+
+
+
+
+
+
+
+
+
+

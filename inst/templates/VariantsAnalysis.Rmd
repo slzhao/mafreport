@@ -1,0 +1,120 @@
+
+# Analysis
+## Somatic Interactions
+```{r,message=FALSE,results='markup'}
+try(somaticInteractions(maf = dataForReport[["maf"]], top = 10,genes=dataForReport[["interestedGenes"]], pvalue = c(0.05, 0.1)))
+```
+
+## Detecting cancer driver genes based on positional clustering
+```{r,results='hide'}
+mafOncodrive = oncodrive(maf = dataForReport[["maf"]], AACol = dataForReport[["AACol"]], minMut = 5, pvalMethod = 'zscore')
+```
+```{r}
+#makeDataTable(mafOncodrive[,get(colnames(dataForReport[["maf"]]@gene.summary))])
+makeDataTable(mafOncodrive[,c("Hugo_Symbol",setdiff(colnames(mafOncodrive),colnames(dataForReport[["maf"]]@gene.summary))),with = FALSE])
+
+plotOncodrive(res = mafOncodrive, fdrCutOff = 0.05, useFraction = TRUE)
+```
+
+## Summarizing pfam domains
+```{r}
+mafPfamDomains= pfamDomains(maf = dataForReport[["maf"]], AACol = dataForReport[["AACol"]], top = 10)
+
+```
+
+## Drug-Gene Interactions
+```{r}
+mafDrugInteractions = drugInteractions(maf = dataForReport[["maf"]], fontSize = 0.75)
+
+```
+
+## Oncogenic Signaling Pathways
+```{r,results='markup'}
+mafOncogenicPathways = OncogenicPathways(maf = dataForReport[["maf"]])
+plot(mafOncogenicPathways)
+PlotOncogenicPathways(maf = dataForReport[["maf"]], pathways = mafOncogenicPathways$data$Pathway[1])
+
+```
+
+<!-- ## Tumor heterogeneity and MATH scores -->
+<!-- Top 5 most mutated samples were used -->
+```{r}
+if (dataForReport[["performVaf"]]) {
+  cat("## Tumor heterogeneity and MATH scores")
+  mafInferHeterogeneity = inferHeterogeneity(maf = dataForReport[["maf"]], vafCol = dataForReport[["vafCol"]])
+  
+  #makeDataTable(mafInferHeterogeneity$clusterMeans)
+  out=list(makeDataTable(mafInferHeterogeneity$clusterMeans))
+  print(tagList(out))
+  
+  plotClusters(clusters = mafInferHeterogeneity)
+}
+
+```
+
+<!-- ```{r} -->
+<!-- mafInferHeterogeneity = inferHeterogeneity(maf = dataForReport[["maf"]], vafCol = 'i_TumorVAF_WU') -->
+<!-- gvisTable(mafInferHeterogeneity$clusterMeans,options=tableVisOptions) -->
+<!-- plotClusters(clusters = mafInferHeterogeneity) -->
+
+<!-- ``` -->
+
+## Mutational Signatures
+
+```{r MutationalSignatures,results='markup'}
+genomePackage=paste0("BSgenome.Hsapiens.UCSC.",dataForReport[["genome"]])
+library(genomePackage, quietly = TRUE,character.only=TRUE)
+#mafTnm = trinucleotideMatrix(maf = dataForReport[["maf"]], prefix = 'chr', add = TRUE, ref_genome =dataForReport[["genomePackage"]])
+
+#check "chr" issue. Please note we changed seqlevelsStyle of maf file. May influence other analysis in future. So need to use another variable
+genomePkgStype=suppressWarnings(seqlevelsStyle(BSgenome::getBSgenome(genome =genomePackage)))
+mafObj=dataForReport[["maf"]]
+mafObj@data$Chromosome=as.character(mafObj@data$Chromosome)
+mafObj@maf.silent$Chromosome=as.character(mafObj@maf.silent$Chromosome)
+seqlevelsStyle(mafObj@data$Chromosome)=genomePkgStype
+seqlevelsStyle(mafObj@maf.silent$Chromosome)=genomePkgStype
+
+mafTnm = trinucleotideMatrix(maf = mafObj,ref_genome =genomePackage)
+try(plotApobecDiff(tnm = mafTnm, maf = mafObj))
+
+library('NMF')
+mafTnmSign=try(extractSignatures(mat = mafTnm, plotBestFitRes = FALSE))
+try(plotSignatures(mafTnmSign, title_size = 1 ,yaxisLim=NA))
+
+```
+
+
+<!-- ### dndscv -->
+```{r dndscv}
+if (!is.null(dataForReport[["dndscv.refdb"]])) {
+  cat("## dndscv\n")
+  
+  library(dndscv)
+  mafDatSnp=rbind(dataForReport[["maf"]]@data,dataForReport[["maf"]]@maf.silent)
+  #mafDatSnp=mafDatSnp[which(mafDatSnp$Variant_Type=="SNP"),]
+  dataForModel=mafDatSnp[,.(Tumor_Sample_Barcode ,Chromosome,Start_Position,Reference_Allele,Tumor_Seq_Allele2)]
+  dataForModel$Chromosome=as.character(dataForModel$Chromosome)
+
+  #check chr style in data
+  if (dataForReport[["dndscv.refdb"]] == "hg19") {
+     data("refcds_hg19", package = "dndscv")
+  } else {
+     load(dataForReport[["dndscv.refdb"]])
+  }
+  genomePkgStype=seqlevelsStyle(sapply(RefCDS,function(x) x$chr))
+  seqlevelsStyle(dataForModel$Chromosome)=genomePkgStype
+  #colnames(dataForModel)<-c("sampleID","chr","pos","ref","alt")
+
+  dndsout = dndscv(dataForModel,cv=NULL,refdb=dataForReport[["dndscv.refdb"]],use_indel_sites=FALSE)
+  #print(names(dndsout))
+
+  makeDataTable(dndsout$sel_cv[1:500,])
+  #makeDataTable(dndsout$sel_loc[1:500,])
+  kable(dndsout$globaldnds,row.names=FALSE)
+}
+```
+
+
+
+
+

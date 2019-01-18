@@ -1,0 +1,88 @@
+
+# Variants Visualization
+## Summary
+```{r,fig.width=9,fig.height=9}
+plotmafSummary(maf = dataForReport[["maf"]], rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE)
+```
+
+
+## Variant Level
+### Oncoplots
+```{r,fig.width=9,fig.height=9}
+oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,fontSize = 12,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=dataForReport[["clinicalFeatures"]])
+```
+
+<!-- ### VAF -->
+```{r}
+if (dataForReport[["performVaf"]]) {
+  cat("### VAF\n")
+#  plotVaf(maf = dataForReport[["maf"]], vafCol = dataForReport[["vafCol"]])
+  ##variant level
+  plotVaf(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, vafCol = dataForReport[["vafCol"]])
+}
+
+```
+<!-- ```{r} -->
+<!-- plotVaf(maf = dataForReport[["maf"]], vafCol = dataForReport[["vafCol"]]) -->
+<!-- ``` -->
+
+### Transition and Transversions
+```{r,fig.width=9,fig.height=9}
+mafContent.titv = titv(maf = dataForReport[["maf"]], plot = FALSE, useSyn = TRUE)
+plotTiTv(res = mafContent.titv,showBarcodes=TRUE)
+```
+
+
+### Rainfall plots
+```{r,fig.width=9}
+rainfallPlot(maf = dataForReport[["maf"]],ref.build=dataForReport[["genome"]])
+```
+
+### Compare mutation load against TCGA cohorts
+```{r,results='markup'}
+mafMutload = tcgaCompare(maf = dataForReport[["maf"]])
+```
+
+## Gene Level
+### Genecloud
+```{r}
+suppressWarnings(geneCloud(input = dataForReport[["maf"]], top = 15))
+```
+
+### Oncoplots
+```{r,fig.width=9,fig.height=9}
+oncoplot(maf = dataForReport[["maf"]], top = 10,fontSize = 12,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=dataForReport[["clinicalFeatures"]])
+```
+
+### Oncostrip
+
+```{r,fig.width=9}
+oncostrip(maf = dataForReport[["maf"]], top=10,genes=dataForReport[["interestedGenes"]],removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=dataForReport[["clinicalFeatures"]])
+```
+
+<!-- ### VAF -->
+```{r}
+if (dataForReport[["performVaf"]]) {
+  cat("### Gene VAF\n")
+  plotVaf(maf = dataForReport[["maf"]], vafCol = dataForReport[["vafCol"]])
+}
+```
+
+### Lollipop plots for amino acid changes
+```{r,results='markup',fig.width=9}
+#check if the interestedGenes were recorded in protein_domains.RDs 
+gff = readRDS(file = system.file("extdata", "protein_domains.RDs", package = "maftools"))
+data.table::setDT(x = gff)
+interestedGenesInDb=intersect(dataForReport[["interestedGenes"]],gff[,HGNC])
+if (length(dataForReport[["interestedGenes"]])>length(interestedGenesInDb)) {
+  temp=setdiff(dataForReport[["interestedGenes"]],interestedGenesInDb)
+  warning(paste0(length(temp), " interestedGenes were not recored in protein_domains database, removed from Lollipop plots"))
+  print(paste0("Interested Genes removed: ", paste(temp,collapse=";")))
+}
+
+
+for (i in 1:length(interestedGenesInDb)) {
+  print(lollipopPlot(maf = dataForReport[["maf"]], gene = interestedGenesInDb[i], AACol = dataForReport[["AACol"]], showMutationRate = TRUE))
+}
+
+```

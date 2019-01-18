@@ -1,0 +1,67 @@
+
+# High Frequency Variants and Gene Check
+```{r,results='markup',fig.width=9}
+dataForPlot=dataForReport[["maf"]]
+temp=paste0(dataForPlot@data[,Hugo_Symbol],"_",dataForPlot@data[,get(dataForReport[["AACol"]])])
+dataForPlot@data$Hugo_Symbol=temp
+dataForPlot@gene.summary = maftools:::summarizeMaf(maf = subsetMaf(maf = dataForPlot, fields = 'Hugo_Symbol', includeSyn = FALSE), chatty = FALSE)[[c("gene.summary")]]
+
+#Top 20 FLAGS - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4267152/
+#https://github.com/PoisonAlien/maftools/blob/master/R/summarizeMaf.R
+flagsGenes = c("TTN", "MUC16", "OBSCN", "AHNAK2", "SYNE1", "FLG", "MUC5B",
+            "DNAH17", "PLEC", "DST", "SYNE2", "NEB", "HSPG2", "LAMA5", "AHNAK",
+            "HMCN1", "USH2A", "DNAH11", "MACF1", "MUC17")
+flagsGenes=intersect(flagsGenes,dataForReport[["maf"]]@gene.summary$Hugo_Symbol)
+if (length(flagsGenes)>0) {
+  warning(paste0(length(flagsGenes)," FLAGS genes identified. More details at www.ncbi.nlm.nih.gov/pmc/articles/PMC4267152/"))
+}
+
+highFreqGenes=setdiff(c(flagsGenes,dataForReport[["maf"]]@gene.summary$Hugo_Symbol[1:10]),dataForReport[["interestedGenes"]])
+if (length(highFreqGenes)==0) {
+  highFreqGenes=dataForReport[["interestedGenes"]]
+}
+
+#check if the interestedGenes were recorded in protein_domains.RDs 
+gff = readRDS(file = system.file("extdata", "protein_domains.RDs", package = "maftools"))
+data.table::setDT(x = gff)
+
+interestedGenesInDb=intersect(highFreqGenes,gff[,HGNC])
+if (length(highFreqGenes)>length(interestedGenesInDb)) {
+  temp=setdiff(highFreqGenes,interestedGenesInDb)
+  warning(paste0(length(temp), " interestedGenes were not recored in protein_domains database, removed from Lollipop plots"))
+  print(paste0("Interested Genes removed: ", paste(temp,collapse=";")))
+}
+
+
+for (i in 1:length(highFreqGenes)) {
+#for (i in 1:3) {
+#  i=1
+  #Lollipop plots
+  if (highFreqGenes[i] %in% interestedGenesInDb) {
+      print(lollipopPlot(maf = dataForReport[["maf"]], gene=highFreqGenes[i], AACol = dataForReport[["AACol"]], showMutationRate = TRUE))
+  }
+
+  #onco plot
+  selectedInd=which(dataForReport[["maf"]]@data[,Hugo_Symbol]==highFreqGenes[i])
+  variantsToPlotUnique=unique(dataForPlot@data$Hugo_Symbol[selectedInd])
+  samplesToPlot=unique(dataForPlot@data$Tumor_Sample_Barcode[selectedInd])
+  
+  if (length(variantsToPlotUnique)>1 & length(samplesToPlot)>1) {
+    plot.new()
+    oncostrip(maf = dataForPlot, top=20,genes=variantsToPlotUnique,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=dataForReport[["clinicalFeatures"]])
+  }
+  
+  #VAF
+  if (dataForReport[["performVaf"]]) {
+    plotVaf(maf = dataForPlot, genes=variantsToPlotUnique,vafCol = dataForReport[["vafCol"]])
+  }
+
+}
+
+```
+
+
+
+
+
+

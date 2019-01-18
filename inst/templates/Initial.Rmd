@@ -1,0 +1,120 @@
+
+```{r,message=FALSE,echo=FALSE}
+#Read Maf if not readed outside report
+if (!("maf" %in% names(dataForReport))) {
+  if ("vc_nonSyn" %in% names(dataForReport)) {
+	  dataForReport[["maf"]]=read.maf(maf =dataForReport[["mafFile"]],vc_nonSyn=dataForReport[["vc_nonSyn"]],clinicalData=dataForReport[["clinicalData"]])
+  } else {
+	  dataForReport[["maf"]]=read.maf(maf =dataForReport[["mafFile"]],clinicalData=dataForReport[["clinicalData"]])
+  }
+}
+
+if (! "reportOut" %in% names(dataForReport)) {
+	dataForReport[["reportOut"]]=paste0(basename(dataForReport[["mafFile"]]),".report.html")
+}
+
+if (!("genome" %in% names(dataForReport))) {
+	#BSgenome.Hsapiens.UCSC.hg19
+	dataForReport[["genome"]]="hg19"
+}
+
+#dndscv.refdb
+if (!("dndscv.refdb" %in% names(dataForReport))) {
+  dataForReport[["dndscv.refdb"]]=NULL
+	warning(paste0("genome defined but dndscv genome db file not defined or not existed. Can't do dndscv"))
+}
+
+if (!("dndscv.refdb" %in% names(dataForReport))) {
+  if (dataForReport[["genome"]]=="hg19") {
+    dataForReport[["dndscv.refdb"]]="hg19"
+  } else {
+    dataForReport[["dndscv.refdb"]]=NULL
+    warning(paste0("genome defined but dndscv genome db file not defined or not existed. Can't do dndscv"))
+  }
+} else {
+  if (dataForReport[["dndscv.refdb"]]!="hg19" & !(file.exists(dataForReport[["dndscv.refdb"]]))) {
+    stop(paste0("dndscv.refdb defined but not existed:",dataForReport[["dndscv.refdb"]],". Can't do dndscv"))
+  }
+}
+
+
+
+
+#Clinic data
+if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
+  dataForReport[["clinicalFeatures"]]=intersect(dataForReport[["clinicalFeatures"]],colnames(dataForReport[["maf"]]@clinical.data))
+  if (length(dataForReport[["clinicalFeatures"]])>0) {
+    setkey(dataForReport[["maf"]]@clinical.data,"Tumor_Sample_Barcode")
+    dataForReport[["maf"]]@data<-cbind(dataForReport[["maf"]]@data,dataForReport[["maf"]]@clinical.data[.(dataForReport[["maf"]]@data$Tumor_Sample_Barcode),])
+    dataForReport[["maf"]]@maf.silent<-cbind(dataForReport[["maf"]]@maf.silent,dataForReport[["maf"]]@clinical.data[.(dataForReport[["maf"]]@maf.silent$Tumor_Sample_Barcode),])
+  } else {
+    stop(paste0("clinicalFeatures defined but not found in column names of clinicalData"))
+  }
+}
+
+#Interested Genes: If defined, overlap with mutation genes. If not, use top 10 genes
+if ("interestedGenes" %in% names(dataForReport)) {
+  dataForReport[["interestedGenes"]] = intersect(dataForReport[["interestedGenes"]],getGeneSummary(x = dataForReport[["maf"]])[, Hugo_Symbol])
+} else {
+  dataForReport[["interestedGenes"]] = getGeneSummary(x = dataForReport[["maf"]])[1:10, Hugo_Symbol]
+}
+
+#Vaf perform analysis Y/N and caculation
+if (!("performVaf" %in% names(dataForReport)) || dataForReport[["performVaf"]]) { #Not defined or dataForReport[["performVaf"]]==TRUE
+  dataForReport[["performVaf"]]=TRUE
+  caculateVaf=FALSE
+  
+  if ("vafCol" %in% names(dataForReport)) { #defined vafCol
+     if (!(dataForReport[["vafCol"]] %in% getFields(dataForReport[["maf"]]))) { #defined vafCol NOT in maf data column
+       warning(paste0("Defined vafCol as ",dataForReport[["vafCol"]]," but not found in maf." ))
+       caculateVaf=TRUE
+     }
+  } else { #Not defined vafCol
+      caculateVaf=TRUE
+  }
+  if (caculateVaf) {
+    if (all(c("t_alt_count","t_ref_count") %in% getFields(dataForReport[["maf"]]))) {
+      message("Cacualte Vaf based on Alt/(Ref+Alt) count and recored in t_vaf column")
+      dataForReport[["vafCol"]]="t_vaf"
+    
+      #dataForReport[["maf"]]@data[,t_vaf:=dataForReport[["maf"]]@data[,t_alt_count]/(dataForReport[["maf"]]@data[,t_alt_count]+dataForReport[["maf"]]@data[,t_ref_count])]
+      dataForReport[["maf"]]@data[,t_vaf:=dataForReport[["maf"]]@data[,t_alt_count]/as.integer(dataForReport[["maf"]]@data[,t_depth])]
+      
+      #dataForReport[["maf"]]@maf.silent[,t_vaf:=dataForReport[["maf"]]@maf.silent[,t_alt_count]/(dataForReport[["maf"]]@maf.silent[,t_alt_count]+dataForReport[["maf"]]@maf.silent[,t_ref_count])]
+            dataForReport[["maf"]]@maf.silent[,t_vaf:=dataForReport[["maf"]]@maf.silent[,t_alt_count]/as.integer(dataForReport[["maf"]]@maf.silent[,t_depth])]
+    } else {
+      warning(paste0("Try to cacualte Vaf based on Alt/(Ref+Alt) count"," but t_alt_count or t_ref_count not found in maf." ))
+      dataForReport[["performVaf"]]=FALSE
+    }
+  }
+} else {  #dataForReport[["performVaf"]]==FALSE
+  dataForReport[["performVaf"]]=FALSE
+}
+
+
+if (!("performAnalysis" %in% names(dataForReport))) {
+  dataForReport[["performAnalysis"]] = TRUE
+}
+
+if (!("AACol" %in% names(dataForReport))) {
+  preDefinedAACol=c("HGVSp_Short", "Protein_Change", "AAChange")
+  temp=intersect(preDefinedAACol,colnames(dataForReport[["maf"]]@data))
+  if (length(temp)>0) {
+    dataForReport[["AACol"]]=temp[1]
+  } else {
+    stop(paste0("Need provide AACol or maf file colnames should have one of ", paste0(preDefinedAACol,collapse=";")))
+  }
+}
+
+if (!("vIdCol" %in% names(dataForReport))) {
+  dataForReport[["vIdCol"]]=c("Hugo_Symbol",dataForReport[["AACol"]],"Chromosome","Start_Position","End_Position","Reference_Allele","Tumor_Seq_Allele2")
+}
+
+#summary variant
+dataForReport[["mafProcessed"]]$variantCountSummary=summaryVariant(dataForReport[["maf"]],vIdCol=dataForReport[["vIdCol"]])
+#summary variant
+dataForReport[["mafProcessed"]]$variantMafOncoPlot=prepareVariantOncoPlot(dataForReport[["maf"]],AACol=dataForReport[["AACol"]])
+
+```
+
+
