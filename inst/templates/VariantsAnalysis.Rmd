@@ -5,36 +5,50 @@
 try(somaticInteractions(maf = dataForReport[["maf"]], top = 10,genes=dataForReport[["interestedGenes"]], pvalue = c(0.05, 0.1)))
 ```
 
-## Detecting cancer driver genes based on positional clustering
+<!-- ## Detecting cancer driver genes based on positional clustering -->
 ```{r,results='hide'}
-mafOncodrive = oncodrive(maf = dataForReport[["maf"]], AACol = dataForReport[["AACol"]], minMut = 5, pvalMethod = 'zscore')
+if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
+  cat("## Detecting cancer driver genes based on positional clustering\n")
+  mafOncodrive = oncodrive(maf = dataForReport[["maf"]], AACol = dataForReport[["AACol"]], minMut = 5, pvalMethod = 'zscore')
+}
 ```
+
 ```{r}
-#makeDataTable(mafOncodrive[,get(colnames(dataForReport[["maf"]]@gene.summary))])
-makeDataTable(mafOncodrive[,c("Hugo_Symbol",setdiff(colnames(mafOncodrive),colnames(dataForReport[["maf"]]@gene.summary))),with = FALSE])
-
-plotOncodrive(res = mafOncodrive, fdrCutOff = 0.05, useFraction = TRUE)
+if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
+  makeDataTable(mafOncodrive[,c("Hugo_Symbol",setdiff(colnames(mafOncodrive),colnames(dataForReport[["maf"]]@gene.summary))),with = FALSE])
+  plotOncodrive(res = mafOncodrive, fdrCutOff = 0.05, useFraction = TRUE)
+}
 ```
 
-## Summarizing pfam domains
+<!-- ## Summarizing pfam domains -->
 ```{r}
-mafPfamDomains= pfamDomains(maf = dataForReport[["maf"]], AACol = dataForReport[["AACol"]], top = 10)
-
+if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
+  cat("## Summarizing pfam domains\n")
+  mafPfamDomains= pfamDomains(maf = dataForReport[["maf"]], AACol = dataForReport[["AACol"]], top = 10)
+}
 ```
 
-## Drug-Gene Interactions
-```{r}
-mafDrugInteractions = drugInteractions(maf = dataForReport[["maf"]], fontSize = 0.75)
 
-```
-
-## Oncogenic Signaling Pathways
+<!-- ## Drug-Gene Interactions -->
 ```{r,results='markup'}
-mafOncogenicPathways = OncogenicPathways(maf = dataForReport[["maf"]])
+if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
+  cat("## Drug-Gene Interactions\n")
+  mafDrugInteractions = drugInteractions(maf = dataForReport[["maf"]], fontSize = 0.75)
+}
+```
+
+
+
+<!-- ## Oncogenic Signaling Pathways -->
+```{r,results='markup'}
+if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
+  cat("## Oncogenic Signaling Pathways\n")
+  mafOncogenicPathways = OncogenicPathways(maf = dataForReport[["maf"]])
 plot(mafOncogenicPathways)
 PlotOncogenicPathways(maf = dataForReport[["maf"]], pathways = mafOncogenicPathways$data$Pathway[1])
-
+}
 ```
+
 
 <!-- ## Tumor heterogeneity and MATH scores -->
 <!-- Top 5 most mutated samples were used -->
@@ -62,7 +76,12 @@ if (dataForReport[["performVaf"]]) {
 ## Mutational Signatures
 
 ```{r MutationalSignatures,results='markup'}
-genomePackage=paste0("BSgenome.Hsapiens.UCSC.",dataForReport[["genome"]])
+if (dataForReport[["genome"]]=="mm10") {
+  genomePackage=paste0("BSgenome.Mmusculus.UCSC.",dataForReport[["genome"]])
+} else {
+  genomePackage=paste0("BSgenome.Hsapiens.UCSC.",dataForReport[["genome"]])
+}
+
 library(genomePackage, quietly = TRUE,character.only=TRUE)
 #mafTnm = trinucleotideMatrix(maf = dataForReport[["maf"]], prefix = 'chr', add = TRUE, ref_genome =dataForReport[["genomePackage"]])
 
@@ -84,12 +103,12 @@ try(plotSignatures(mafTnmSign, title_size = 1 ,yaxisLim=NA))
 ```
 
 
-<!-- ### dndscv -->
+<!-- ## dndscv -->
 ```{r dndscv}
 if (!is.null(dataForReport[["dndscv.refdb"]])) {
   cat("## dndscv\n")
   
-  library(dndscv)
+#  library(dndscv)
   mafDatSnp=rbind(dataForReport[["maf"]]@data,dataForReport[["maf"]]@maf.silent)
   #mafDatSnp=mafDatSnp[which(mafDatSnp$Variant_Type=="SNP"),]
   dataForModel=mafDatSnp[,.(Tumor_Sample_Barcode ,Chromosome,Start_Position,Reference_Allele,Tumor_Seq_Allele2)]
@@ -105,7 +124,7 @@ if (!is.null(dataForReport[["dndscv.refdb"]])) {
   seqlevelsStyle(dataForModel$Chromosome)=genomePkgStype
   #colnames(dataForModel)<-c("sampleID","chr","pos","ref","alt")
 
-  dndsout = dndscv(dataForModel,cv=NULL,refdb=dataForReport[["dndscv.refdb"]],use_indel_sites=FALSE)
+  dndsout = dndscv::dndscv(dataForModel,cv=NULL,refdb=dataForReport[["dndscv.refdb"]],use_indel_sites=FALSE)
   #print(names(dndsout))
 
   makeDataTable(dndsout$sel_cv[1:500,])

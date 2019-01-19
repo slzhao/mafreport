@@ -1,5 +1,6 @@
 #' @import methods
 #' @import GenomicRanges
+#' @import dndscv
 #' @importMethodsFrom GenomicRanges reduce
 usethis::use_package("data.table","Depends")
 usethis::use_package("maftools","Depends")
