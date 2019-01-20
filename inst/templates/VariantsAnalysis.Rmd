@@ -75,7 +75,7 @@ if (dataForReport[["performVaf"]]) {
 
 ## Mutational Signatures
 
-```{r MutationalSignatures,results='markup'}
+```{r MutationalSignatures,results='markup',eval=FALSE}
 if (dataForReport[["genome"]]=="mm10") {
   genomePackage=paste0("BSgenome.Mmusculus.UCSC.",dataForReport[["genome"]])
 } else {
@@ -128,7 +128,10 @@ if (!is.null(dataForReport[["dndscv.refdb"]])) {
   #print(names(dndsout))
 
   makeDataTable(dndsout$sel_cv[1:500,])
-  #makeDataTable(dndsout$sel_loc[1:500,])
+#  kable(dndsout$globaldnds,row.names=FALSE)
+}
+
+if (!is.null(dataForReport[["dndscv.refdb"]])) {  #have to be in a seprate section to make sure makeDataTable(dndsout$sel_cv[1:500,]) can display
   kable(dndsout$globaldnds,row.names=FALSE)
 }
 ```

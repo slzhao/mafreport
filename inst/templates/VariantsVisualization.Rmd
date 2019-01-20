@@ -2,6 +2,7 @@
 # Variants Visualization
 ## Summary
 ```{r,fig.width=9,fig.height=9}
+print("Vis 1\n")
 plotmafSummary(maf = dataForReport[["maf"]], rmOutlier = TRUE, addStat = 'median', dashboard = TRUE, titvRaw = FALSE)
 ```
 
@@ -92,5 +93,5 @@ if (length(interestedGenesInDb)>0) {
     warning(paste0("Zero genes recored in protein_domains database, no Lollipop plots"))
 }
 
-
+print("Vis End\n")
 ```

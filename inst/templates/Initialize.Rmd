@@ -3,20 +3,21 @@
 #Read Maf if not readed outside report
 if (!("maf" %in% names(dataForReport))) {
   if ("vc_nonSyn" %in% names(dataForReport)) {
-	  dataForReport[["maf"]]=read.maf(maf =dataForReport[["mafFile"]],vc_nonSyn=dataForReport[["vc_nonSyn"]],clinicalData=dataForReport[["clinicalData"]])
+	  dataForReport[["maf"]]=read.maf(maf =dataForReport[["mafFile"]],vc_nonSyn=dataForReport[["vc_nonSyn"]],clinicalData=dataForReport[["clinicalData"]],verbose=FALSE)
   } else {
-	  dataForReport[["maf"]]=read.maf(maf =dataForReport[["mafFile"]],clinicalData=dataForReport[["clinicalData"]])
+	  dataForReport[["maf"]]=read.maf(maf =dataForReport[["mafFile"]],clinicalData=dataForReport[["clinicalData"]],verbose=FALSE)
   }
 }
 
-if (! "reportOut" %in% names(dataForReport)) {
-	dataForReport[["reportOut"]]=paste0(basename(dataForReport[["mafFile"]]),".report.html")
-}
+#if (! "reportOut" %in% names(dataForReport)) {
+#	dataForReport[["reportOut"]]=paste0(basename(dataForReport[["mafFile"]]),".report.html")
+#}
 
-if (!("genome" %in% names(dataForReport))) {
-	#BSgenome.Hsapiens.UCSC.hg19
-	dataForReport[["genome"]]="hg19"
-}
+#if (!("genome" %in% names(dataForReport))) {
+#	#BSgenome.Hsapiens.UCSC.hg19
+#	dataForReport[["genome"]]="hg19"
+#}
+
 
 #dndscv.refdb
 if (!("dndscv.refdb" %in% names(dataForReport))) {
@@ -36,8 +37,6 @@ if (!("dndscv.refdb" %in% names(dataForReport))) {
     stop(paste0("dndscv.refdb defined but not existed:",dataForReport[["dndscv.refdb"]],". Can't do dndscv"))
   }
 }
-
-
 
 
 #Clinic data
@@ -73,8 +72,8 @@ if (!("performVaf" %in% names(dataForReport)) || dataForReport[["performVaf"]]) 
       caculateVaf=TRUE
   }
   if (caculateVaf) {
-    if (all(c("t_alt_count","t_ref_count") %in% getFields(dataForReport[["maf"]]))) {
-      message("Cacualte Vaf based on Alt/(Ref+Alt) count and recored in t_vaf column")
+    if (all(c("t_alt_count","t_depth") %in% getFields(dataForReport[["maf"]]))) {
+      message("Cacualte Vaf based on Alt/(Depth) count and recored in t_vaf column")
       dataForReport[["vafCol"]]="t_vaf"
     
       #dataForReport[["maf"]]@data[,t_vaf:=dataForReport[["maf"]]@data[,t_alt_count]/(dataForReport[["maf"]]@data[,t_alt_count]+dataForReport[["maf"]]@data[,t_ref_count])]
@@ -83,7 +82,7 @@ if (!("performVaf" %in% names(dataForReport)) || dataForReport[["performVaf"]]) 
       #dataForReport[["maf"]]@maf.silent[,t_vaf:=dataForReport[["maf"]]@maf.silent[,t_alt_count]/(dataForReport[["maf"]]@maf.silent[,t_alt_count]+dataForReport[["maf"]]@maf.silent[,t_ref_count])]
             dataForReport[["maf"]]@maf.silent[,t_vaf:=dataForReport[["maf"]]@maf.silent[,t_alt_count]/as.integer(dataForReport[["maf"]]@maf.silent[,t_depth])]
     } else {
-      warning(paste0("Try to cacualte Vaf based on Alt/(Ref+Alt) count"," but t_alt_count or t_ref_count not found in maf." ))
+      warning(paste0("Try to cacualte Vaf based on Alt/(t_depth) count"," but t_alt_count or t_depth not found in maf." ))
       dataForReport[["performVaf"]]=FALSE
     }
   }

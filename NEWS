@@ -1,3 +1,10 @@
+CHANGES IN VERSION 0.1.2 2019-01-19
+------------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o Improve structure. Add initialize_maf_report_parameter and make_maf_report functions to make it easier to use.
+
 CHANGES IN VERSION 0.1.1 2019-01-18
 ------------------------------------
 

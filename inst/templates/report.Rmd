@@ -21,19 +21,21 @@ library(knitr)
 
 knitr::opts_chunk$set(echo = dataForReport[["showCode"]],results='asis')
 options(width = 3000)
+
+print("Section 0")
 ```
 
 
-```{r,include=FALSE}
-reportTemplates=dataForReport[["reportTemplates"]]
+```{r,include=FALSE,results='hide'}
+reportModules=dataForReport[["reportModules"]]
 out = NULL
 
-for (i in 1:length(reportTemplates)) {
-  rmdFile=reportTemplates[i]
+for (i in 1:length(reportModules)) {
+  rmdFile=reportModules[i]
   if (file.exists(rmdFile)) {
     out = c(out, knit_child(rmdFile))
   } else {
-    warning(paste0("File ",rmdFile," defined in reportTemplates but doesn't exist."))
+    warning(paste0("File ",rmdFile," defined in reportModules but doesn't exist."))
   }
   
 }
@@ -45,6 +47,9 @@ for (i in 1:length(reportTemplates)) {
 
 
 
+```{r}
+save(dataForReport,file=paste0(dataForReport[["reportOutDir"]],dataForReport[["reportOut"]],".RData"))
+```
 
 
 
