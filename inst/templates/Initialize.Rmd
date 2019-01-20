@@ -22,22 +22,15 @@ if (!("maf" %in% names(dataForReport))) {
 #dndscv.refdb
 if (!("dndscv.refdb" %in% names(dataForReport))) {
   dataForReport[["dndscv.refdb"]]=NULL
-	warning(paste0("genome defined but dndscv genome db file not defined or not existed. Can't do dndscv"))
 }
-
-if (!("dndscv.refdb" %in% names(dataForReport))) {
-  if (dataForReport[["genome"]]=="hg19") {
-    dataForReport[["dndscv.refdb"]]="hg19"
-  } else {
-    dataForReport[["dndscv.refdb"]]=NULL
-    warning(paste0("genome defined but dndscv genome db file not defined or not existed. Can't do dndscv"))
-  }
+if (is.null(dataForReport[["dndscv.refdb"]])) {
+  	warning(paste0("genome defined but dndscv.refdb not defined or not existed. Can't do dndscv"))
 } else {
   if (dataForReport[["dndscv.refdb"]]!="hg19" & !(file.exists(dataForReport[["dndscv.refdb"]]))) {
-    stop(paste0("dndscv.refdb defined but not existed:",dataForReport[["dndscv.refdb"]],". Can't do dndscv"))
+    dataForReport[["dndscv.refdb"]]=NULL
+    warning(paste0("dndscv.refdb defined but not existed:",dataForReport[["dndscv.refdb"]],". Can't do dndscv"))
   }
 }
-
 
 #Clinic data
 if (!is.null(dataForReport[["clinicalFeatures"]][1])) {

@@ -11,7 +11,9 @@ initialize_maf_report_parameter<-
            vc_nonSyn=c("Frame_Shift_Del", "Frame_Shift_Ins", "Splice_Site", "Translation_Start_Site",
                        "Nonsense_Mutation",	"Nonstop_Mutation",
                        #"In_Frame_Del", "In_Frame_Ins",
-                       "Missense_Mutation")
+                       "Missense_Mutation"),
+           dndscv.refdb=genome,
+           showCode=TRUE
            ) {
 
   dataForReport=list()
@@ -23,6 +25,8 @@ initialize_maf_report_parameter<-
   dataForReport[["genome"]]=genome
   dataForReport[["vafCol"]]=vafCol
   dataForReport[["vc_nonSyn"]]=vc_nonSyn
+  dataForReport[["dndscv.refdb"]]=dndscv.refdb
+  dataForReport[["showCode"]]=showCode
 
   # checkAndAddParameter=function(dataForReport,ParameterName,defaultValue) {
   #   if (is.null(ParameterName)) {
