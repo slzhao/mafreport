@@ -86,12 +86,12 @@ library(genomePackage, quietly = TRUE,character.only=TRUE)
 #mafTnm = trinucleotideMatrix(maf = dataForReport[["maf"]], prefix = 'chr', add = TRUE, ref_genome =dataForReport[["genomePackage"]])
 
 #check "chr" issue. Please note we changed seqlevelsStyle of maf file. May influence other analysis in future. So need to use another variable
-genomePkgStype=suppressWarnings(seqlevelsStyle(BSgenome::getBSgenome(genome =genomePackage)))
+genomePkgStype=suppressWarnings(GenomeInfoDb::seqlevelsStyle(BSgenome::getBSgenome(genome =genomePackage)))
 mafObj=dataForReport[["maf"]]
 mafObj@data$Chromosome=as.character(mafObj@data$Chromosome)
 mafObj@maf.silent$Chromosome=as.character(mafObj@maf.silent$Chromosome)
-seqlevelsStyle(mafObj@data$Chromosome)=genomePkgStype
-seqlevelsStyle(mafObj@maf.silent$Chromosome)=genomePkgStype
+GenomeInfoDb::seqlevelsStyle(mafObj@data$Chromosome)=genomePkgStype
+GenomeInfoDb::seqlevelsStyle(mafObj@maf.silent$Chromosome)=genomePkgStype
 
 mafTnm = trinucleotideMatrix(maf = mafObj,ref_genome =genomePackage)
 try(plotApobecDiff(tnm = mafTnm, maf = mafObj))
@@ -120,8 +120,8 @@ if (!is.null(dataForReport[["dndscv.refdb"]])) {
   } else {
      load(dataForReport[["dndscv.refdb"]])
   }
-  genomePkgStype=seqlevelsStyle(sapply(RefCDS,function(x) x$chr))
-  seqlevelsStyle(dataForModel$Chromosome)=genomePkgStype
+  genomePkgStype=GenomeInfoDb::seqlevelsStyle(sapply(RefCDS,function(x) x$chr))
+  GenomeInfoDb::seqlevelsStyle(dataForModel$Chromosome)=genomePkgStype
   #colnames(dataForModel)<-c("sampleID","chr","pos","ref","alt")
 
   dndsout = dndscv::dndscv(dataForModel,cv=NULL,refdb=dataForReport[["dndscv.refdb"]],use_indel_sites=FALSE)

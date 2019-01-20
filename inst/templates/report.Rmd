@@ -22,7 +22,6 @@ library(knitr)
 knitr::opts_chunk$set(echo = dataForReport[["showCode"]],results='asis')
 options(width = 3000)
 
-print("Section 0")
 ```
 
 
@@ -48,7 +47,7 @@ for (i in 1:length(reportModules)) {
 
 
 ```{r}
-save(dataForReport,file=paste0(dataForReport[["reportOutDir"]],dataForReport[["reportOut"]],".RData"))
+save(dataForReport,file=paste0(dataForReport[["reportOutDir"]],"/",dataForReport[["reportOut"]],".RData"))
 ```
 
 

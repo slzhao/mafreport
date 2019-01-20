@@ -5,7 +5,7 @@ initialize_maf_report_parameter<-
            reportOut=paste0(basename(mafFile),".report.html"),
            reportOutDir=dirname(mafFile),
            reportTemplate=system.file('templates', "report.Rmd", package = 'mafreport'),
-           reportModules=c("initialize.Rmd","SummaryTables.Rmd","VariantsVisualization.Rmd","HighFreqVariantsCheck.Rmd","VariantsAnalysis.Rmd"),
+           reportModules=c("Initialize.Rmd","SummaryTables.Rmd","VariantsVisualization.Rmd","HighFreqVariantsCheck.Rmd","VariantsAnalysis.Rmd"),
            genome="hg19",
            vafCol="t_vaf",
            vc_nonSyn=c("Frame_Shift_Del", "Frame_Shift_Ins", "Splice_Site", "Translation_Start_Site",
@@ -46,4 +46,5 @@ initialize_maf_report_parameter<-
 make_maf_report<-function(dataForReport) {
   dataForReport=dataForReport
   render(dataForReport[["reportTemplate"]],output_dir=dataForReport[["reportOutDir"]], output_file =dataForReport[["reportOut"]])
+  return(dataForReport)
 }

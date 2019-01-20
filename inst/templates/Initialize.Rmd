@@ -58,7 +58,7 @@ if (!("performVaf" %in% names(dataForReport)) || dataForReport[["performVaf"]]) 
   
   if ("vafCol" %in% names(dataForReport)) { #defined vafCol
      if (!(dataForReport[["vafCol"]] %in% getFields(dataForReport[["maf"]]))) { #defined vafCol NOT in maf data column
-       warning(paste0("Defined vafCol as ",dataForReport[["vafCol"]]," but not found in maf." ))
+       message(paste0("Defined vafCol as ",dataForReport[["vafCol"]]," but not found in maf." ))
        caculateVaf=TRUE
      }
   } else { #Not defined vafCol
@@ -66,7 +66,7 @@ if (!("performVaf" %in% names(dataForReport)) || dataForReport[["performVaf"]]) 
   }
   if (caculateVaf) {
     if (all(c("t_alt_count","t_depth") %in% getFields(dataForReport[["maf"]]))) {
-      message("Cacualte Vaf based on Alt/(Depth) count and recored in t_vaf column")
+      message("Cacualting Vaf based on Alt/Depth count and recording in t_vaf column")
       dataForReport[["vafCol"]]="t_vaf"
     
       #dataForReport[["maf"]]@data[,t_vaf:=dataForReport[["maf"]]@data[,t_alt_count]/(dataForReport[["maf"]]@data[,t_alt_count]+dataForReport[["maf"]]@data[,t_ref_count])]
@@ -75,7 +75,7 @@ if (!("performVaf" %in% names(dataForReport)) || dataForReport[["performVaf"]]) 
       #dataForReport[["maf"]]@maf.silent[,t_vaf:=dataForReport[["maf"]]@maf.silent[,t_alt_count]/(dataForReport[["maf"]]@maf.silent[,t_alt_count]+dataForReport[["maf"]]@maf.silent[,t_ref_count])]
             dataForReport[["maf"]]@maf.silent[,t_vaf:=dataForReport[["maf"]]@maf.silent[,t_alt_count]/as.integer(dataForReport[["maf"]]@maf.silent[,t_depth])]
     } else {
-      warning(paste0("Try to cacualte Vaf based on Alt/(t_depth) count"," but t_alt_count or t_depth not found in maf." ))
+      warning(paste0("Try to cacualte Vaf based on Alt/Depth count"," but t_alt_count or t_depth not found in maf." ))
       dataForReport[["performVaf"]]=FALSE
     }
   }
