@@ -44,8 +44,8 @@ for (i in 1:length(highFreqGenes)) {
   }
 
   # #onco plot
-  # selectedInd=which(dataForReport[["maf"]]@data[,Hugo_Symbol]==highFreqGenes[i])
-  # variantsToPlotUnique=unique(dataForPlot@data$Hugo_Symbol[selectedInd])
+   selectedInd=which(dataForReport[["maf"]]@data[,Hugo_Symbol]==highFreqGenes[i])
+   variantsToPlotUnique=unique(dataForPlot@data$Hugo_Symbol[selectedInd])
   # samplesToPlot=unique(dataForPlot@data$Tumor_Sample_Barcode[selectedInd])
   # 
   # if (length(variantsToPlotUnique)>1 & length(samplesToPlot)>1) {
