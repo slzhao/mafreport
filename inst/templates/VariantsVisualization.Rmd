@@ -10,7 +10,7 @@ plotmafSummary(maf = dataForReport[["maf"]], rmOutlier = TRUE, addStat = 'median
 ## Variant Level
 ### Oncoplots
 ```{r,fig.width=9,fig.height=9}
-oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,fontSize = 12,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=dataForReport[["clinicalFeatures"]])
+oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=dataForReport[["clinicalFeatures"]])
 ```
 
 <!-- ### VAF -->
@@ -56,7 +56,7 @@ suppressWarnings(geneCloud(input = dataForReport[["maf"]], top = 15))
 
 ### Oncoplots
 ```{r,fig.width=9,fig.height=9}
-oncoplot(maf = dataForReport[["maf"]], top = 10,fontSize = 12,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=dataForReport[["clinicalFeatures"]])
+oncoplot(maf = dataForReport[["maf"]], top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=dataForReport[["clinicalFeatures"]])
 ```
 
 ### Oncostrip

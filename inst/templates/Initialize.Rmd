@@ -1,5 +1,5 @@
 
-```{r,message=FALSE,echo=FALSE}
+```{r,message=FALSE,echo=FALSE,results='hide'}
 #Read Maf if not readed outside report
 if (!("maf" %in% names(dataForReport))) {
   if ("vc_nonSyn" %in% names(dataForReport)) {

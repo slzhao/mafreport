@@ -24,7 +24,10 @@ if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
 ```{r}
 if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
   cat("## Summarizing pfam domains\n")
-  mafPfamDomains= pfamDomains(maf = dataForReport[["maf"]], AACol = dataForReport[["AACol"]], top = 10)
+  mafObj=dataForReport[["maf"]]
+  #remove not Standard AaChange. Something like "wholegene" will report error. Add ; behind it to aviod it
+  mafObj@data[[dataForReport[["AACol"]]]]=gsub("^[A-Za-z]+$","\\1;",dataForReport[["maf"]]@data[[dataForReport[["AACol"]]]])
+  mafPfamDomains= pfamDomains(maf = mafObj, AACol = dataForReport[["AACol"]], top = 10)
 }
 ```
 

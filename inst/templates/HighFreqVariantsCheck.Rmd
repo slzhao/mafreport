@@ -4,7 +4,9 @@
 dataForPlot=dataForReport[["maf"]]
 temp=paste0(dataForPlot@data[,Hugo_Symbol],"_",dataForPlot@data[,get(dataForReport[["AACol"]])])
 dataForPlot@data$Hugo_Symbol=temp
+
 dataForPlot@gene.summary = maftools:::summarizeMaf(maf = subsetMaf(maf = dataForPlot, fields = 'Hugo_Symbol', includeSyn = FALSE), chatty = FALSE)[[c("gene.summary")]]
+
 
 #Top 20 FLAGS - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4267152/
 #https://github.com/PoisonAlien/maftools/blob/master/R/summarizeMaf.R
@@ -41,15 +43,14 @@ for (i in 1:length(highFreqGenes)) {
       print(lollipopPlot(maf = dataForReport[["maf"]], gene=highFreqGenes[i], AACol = dataForReport[["AACol"]], showMutationRate = TRUE))
   }
 
-  #onco plot
-  selectedInd=which(dataForReport[["maf"]]@data[,Hugo_Symbol]==highFreqGenes[i])
-  variantsToPlotUnique=unique(dataForPlot@data$Hugo_Symbol[selectedInd])
-  samplesToPlot=unique(dataForPlot@data$Tumor_Sample_Barcode[selectedInd])
-  
-  if (length(variantsToPlotUnique)>1 & length(samplesToPlot)>1) {
-    plot.new()
-    oncostrip(maf = dataForPlot, top=20,genes=variantsToPlotUnique,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=dataForReport[["clinicalFeatures"]])
-  }
+  # #onco plot
+  # selectedInd=which(dataForReport[["maf"]]@data[,Hugo_Symbol]==highFreqGenes[i])
+  # variantsToPlotUnique=unique(dataForPlot@data$Hugo_Symbol[selectedInd])
+  # samplesToPlot=unique(dataForPlot@data$Tumor_Sample_Barcode[selectedInd])
+  # 
+  # if (length(variantsToPlotUnique)>1 & length(samplesToPlot)>1) {
+  #   oncostrip(maf = dataForPlot, top=20,genes=variantsToPlotUnique,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=dataForReport[["clinicalFeatures"]])
+  # }
   
   #VAF
   if (dataForReport[["performVaf"]]) {

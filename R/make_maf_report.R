@@ -13,6 +13,8 @@ initialize_maf_report_parameter<-
                        #"In_Frame_Del", "In_Frame_Ins",
                        "Missense_Mutation"),
            dndscv.refdb=genome,
+           clinicalData=NULL,
+           clinicalFeatures=NULL,
            showCode=TRUE
            ) {
 
@@ -26,6 +28,8 @@ initialize_maf_report_parameter<-
   dataForReport[["vafCol"]]=vafCol
   dataForReport[["vc_nonSyn"]]=vc_nonSyn
   dataForReport[["dndscv.refdb"]]=dndscv.refdb
+  dataForReport[["clinicalData"]]=clinicalData
+  dataForReport[["clinicalFeatures"]]=clinicalFeatures
   dataForReport[["showCode"]]=showCode
 
   # checkAndAddParameter=function(dataForReport,ParameterName,defaultValue) {
