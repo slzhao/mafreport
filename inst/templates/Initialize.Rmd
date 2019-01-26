@@ -37,15 +37,17 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
   dataForReport[["clinicalFeatures"]]=intersect(dataForReport[["clinicalFeatures"]],colnames(dataForReport[["maf"]]@clinical.data))
   if (length(dataForReport[["clinicalFeatures"]])>0) {
     setkey(dataForReport[["maf"]]@clinical.data,"Tumor_Sample_Barcode")
-    dataForReport[["maf"]]@data<-cbind(dataForReport[["maf"]]@data,dataForReport[["maf"]]@clinical.data[.(dataForReport[["maf"]]@data$Tumor_Sample_Barcode),])
-    dataForReport[["maf"]]@maf.silent<-cbind(dataForReport[["maf"]]@maf.silent,dataForReport[["maf"]]@clinical.data[.(dataForReport[["maf"]]@maf.silent$Tumor_Sample_Barcode),])
+#    dataForReport[["maf"]]@data<-cbind(dataForReport[["maf"]]@data,dataForReport[["maf"]]@clinical.data[.(dataForReport[["maf"]]@data$Tumor_Sample_Barcode),])
+#    dataForReport[["maf"]]@maf.silent<-cbind(dataForReport[["maf"]]@maf.silent,dataForReport[["maf"]]@clinical.data[.(dataForReport[["maf"]]@maf.silent$Tumor_Sample_Barcode),])
+    dataForReport[["maf"]]@data<-merge(dataForReport[["maf"]]@data,dataForReport[["maf"]]@clinical.data,by="Tumor_Sample_Barcode",all.x = TRUE,sort=FALSE)
+    dataForReport[["maf"]]@maf.silent<-merge(dataForReport[["maf"]]@maf.silent,dataForReport[["maf"]]@clinical.data,by="Tumor_Sample_Barcode",all.x = TRUE,sort=FALSE)
   } else {
     stop(paste0("clinicalFeatures defined but not found in column names of clinicalData"))
   }
 }
 
 #Interested Genes: If defined, overlap with mutation genes. If not, use top 10 genes
-if ("interestedGenes" %in% names(dataForReport)) {
+if ("interestedGenes" %in% names(dataForReport) & !is.null(dataForReport[["interestedGenes"]])) {
   dataForReport[["interestedGenes"]] = intersect(dataForReport[["interestedGenes"]],getGeneSummary(x = dataForReport[["maf"]])[, Hugo_Symbol])
 } else {
   dataForReport[["interestedGenes"]] = getGeneSummary(x = dataForReport[["maf"]])[1:10, Hugo_Symbol]
