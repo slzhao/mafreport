@@ -24,14 +24,21 @@ options(width = 3000)
 
 ```
 
+<!-- run Initialize.Rmd seprately as it may change selected modules -->
+```{r child = 'Initialize.Rmd'}
+```
 
-```{r,include=FALSE,results='hide'}
+
+```{r,include=FALSE,results='hide',message=TRUE}
+#run all selected modules except Initialize.Rmd
 reportModules=dataForReport[["reportModules"]]
+reportModules=reportModules[reportModules!="Initialize.Rmd"]
 out = NULL
 
 for (i in 1:length(reportModules)) {
   rmdFile=reportModules[i]
   if (file.exists(rmdFile)) {
+    message(paste0("Working in ",rmdFile))
     out = c(out, knit_child(rmdFile))
   } else {
     warning(paste0("File ",rmdFile," defined in reportModules but doesn't exist."))

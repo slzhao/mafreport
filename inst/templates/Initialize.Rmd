@@ -1,5 +1,5 @@
 
-```{r,message=FALSE,echo=FALSE,results='hide'}
+```{r,message=TRUE,echo=FALSE,results='hide'}
 #Read Maf if not readed outside report
 if (!("maf" %in% names(dataForReport))) {
   if ("vc_nonSyn" %in% names(dataForReport)) {
@@ -46,7 +46,7 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
       dataForReport[["performGroupSummary"]]=TRUE
     }
     if (dataForReport[["performGroupSummary"]]) {
-      cat(paste0("\nDefined clinicalFeatures, will report GroupSummary"))
+      message(paste0("\nDefined clinicalFeatures, will report GroupSummary\n"))
       if (!("GroupSummary.Rmd" %in% dataForReport[["reportModules"]])) {
         dataForReport[["reportModules"]]=c(dataForReport[["reportModules"]],"GroupSummary.Rmd")
       }
