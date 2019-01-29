@@ -1,0 +1,92 @@
+
+# Group/Family summary
+
+<!-- ## Variants in Family/Group -->
+```{r}
+if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
+  cat("## Variants in Family/Group Summary\n")
+  
+  maf=dataForReport[["maf"]]@data
+  out<-list()
+  
+  for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
+    #N
+    #vt = maf[,.N, .(Hugo_Symbol,HGVSp_Short, family )]
+#    cat(paste0("### ",clinicalFeaturesOne,"\n"))
+    out<-append(out,list(tags[["h3"]](paste0(clinicalFeaturesOne))))
+    vt = maf[,.N, c(dataForReport[["vIdCol"]],clinicalFeaturesOne)]
+    castFormula=as.formula(paste0(paste(dataForReport[["vIdCol"]],collapse="+"),"~",clinicalFeaturesOne))
+    vt.cast = data.table::dcast(data = vt, formula = castFormula, value.var = 'N', fill = 0)
+#    vt.cast = vt.cast[,total:=rowSums(vt.cast[,(length(dataForReport[["vIdCol"]])+1):ncol(vt.cast), with = FALSE])][order(total, decreasing = TRUE)]
+    vt.cast = vt.cast[,Occur:=apply(vt.cast[,(length(dataForReport[["vIdCol"]])+1):ncol(vt.cast), with = FALSE],1,function(x) length(which(x>0)))][order(Occur, decreasing = TRUE)]
+    out<-append(out,list(makeDataTable(vt.cast[1:200,])))
+    
+    #Percent
+    temp=unique(maf[,.(Tumor_Sample_Barcode,get(clinicalFeaturesOne))])
+    clinicalFeaturesOneSize=table(temp[,2])
+    vt$N.Percent=round(vt$N/clinicalFeaturesOneSize[vt[,get(clinicalFeaturesOne)]],2)
+    vtCastPercent = data.table::dcast(data = vt, formula = castFormula, value.var = 'N.Percent', fill = 0)
+    vtCastPercent = vtCastPercent[,OccurInAll:=apply(vtCastPercent[,(length(dataForReport[["vIdCol"]])+1):ncol(vtCastPercent), with = FALSE],1,function(x) length(which(x==1)))][order(OccurInAll, decreasing = TRUE)]
+    out<-append(out,list(makeDataTable(vtCastPercent[1:200,])))
+    
+  }
+  tagList(out)
+}
+```
+
+## Oncoplots about variants, sort by Family/Group
+```{r,fig.width=9,fig.height=9}
+for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
+    plot.new()
+    oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeaturesOne,sortByAnnotation=TRUE)
+}
+
+```
+
+
+<!-- ## Genes in Family/Group -->
+```{r}
+if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
+  cat("## Genes in Family/Group Summary\n")
+  
+  maf=dataForReport[["maf"]]@data
+  out<-list()
+  
+  for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
+    out<-append(out,list(tags[["h3"]](paste0(clinicalFeaturesOne))))
+    
+    #N
+    #sometimes more than one variant on same gene on the patient, need to remove
+    temp=c("Hugo_Symbol","Tumor_Sample_Barcode",clinicalFeaturesOne)
+    vt=unique(maf[,..temp])
+    vt = vt[,.N, c("Hugo_Symbol",clinicalFeaturesOne)]
+    castFormula=as.formula(paste0("Hugo_Symbol","~",clinicalFeaturesOne))
+    vt.cast = data.table::dcast(data = vt, formula = castFormula, value.var = 'N', fill = 0)
+    vt.cast = vt.cast[,Occur:=apply(vt.cast[,2:ncol(vt.cast), with = FALSE],1,function(x) length(which(x>0)))][order(Occur, decreasing = TRUE)]
+    out<-append(out,list(makeDataTable(vt.cast[1:200,])))
+    
+    #Percent
+    temp=unique(maf[,.(Tumor_Sample_Barcode,get(clinicalFeaturesOne))])
+    clinicalFeaturesOneSize=table(temp[,2])
+    vt$N.Percent=round(vt$N/clinicalFeaturesOneSize[vt[,get(clinicalFeaturesOne)]],2)
+    vtCastPercent = data.table::dcast(data = vt, formula = castFormula, value.var = 'N.Percent', fill = 0)
+    vtCastPercent = vtCastPercent[,OccurInAll:=apply(vtCastPercent[,2:ncol(vtCastPercent), with = FALSE],1,function(x) length(which(x==1)))][order(OccurInAll, decreasing = TRUE)]
+    out<-append(out,list(makeDataTable(vtCastPercent[1:200,])))
+    
+  }
+  tagList(out)
+}
+```
+
+## Oncoplots about Genes, sort by Family/Group
+  
+```{r,fig.width=9,fig.height=9}
+for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
+  plot.new()
+  oncoplot(maf = dataForReport[["maf"]], top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeaturesOne,sortByAnnotation=TRUE)
+
+}
+```
+
+
+

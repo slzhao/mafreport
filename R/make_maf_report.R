@@ -16,6 +16,7 @@ initialize_maf_report_parameter<-
            interestedGenes=NULL,
            clinicalData=NULL,
            clinicalFeatures=NULL,
+           performGroupSummary=NULL,
            showCode=TRUE
            ) {
 
@@ -32,6 +33,7 @@ initialize_maf_report_parameter<-
   dataForReport[["interestedGenes"]]=interestedGenes
   dataForReport[["clinicalData"]]=clinicalData
   dataForReport[["clinicalFeatures"]]=clinicalFeatures
+  dataForReport[["performGroupSummary"]]=performGroupSummary
   dataForReport[["showCode"]]=showCode
 
   # checkAndAddParameter=function(dataForReport,ParameterName,defaultValue) {

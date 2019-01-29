@@ -41,6 +41,16 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
 #    dataForReport[["maf"]]@maf.silent<-cbind(dataForReport[["maf"]]@maf.silent,dataForReport[["maf"]]@clinical.data[.(dataForReport[["maf"]]@maf.silent$Tumor_Sample_Barcode),])
     dataForReport[["maf"]]@data<-merge(dataForReport[["maf"]]@data,dataForReport[["maf"]]@clinical.data,by="Tumor_Sample_Barcode",all.x = TRUE,sort=FALSE)
     dataForReport[["maf"]]@maf.silent<-merge(dataForReport[["maf"]]@maf.silent,dataForReport[["maf"]]@clinical.data,by="Tumor_Sample_Barcode",all.x = TRUE,sort=FALSE)
+    
+    if (is.null(dataForReport[["performGroupSummary"]])) {
+      dataForReport[["performGroupSummary"]]=TRUE
+    }
+    if (dataForReport[["performGroupSummary"]]) {
+      cat(paste0("\nDefined clinicalFeatures, will report GroupSummary"))
+      if (!("GroupSummary.Rmd" %in% dataForReport[["reportModules"]])) {
+        dataForReport[["reportModules"]]=c(dataForReport[["reportModules"]],"GroupSummary.Rmd")
+      }
+    }
   } else {
     stop(paste0("clinicalFeatures defined but not found in column names of clinicalData"))
   }
