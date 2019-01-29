@@ -37,8 +37,14 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
 ## Oncoplots about variants, sort by Family/Group
 ```{r,fig.width=9,fig.height=9}
 for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
+  clinicalFeaturesOneSize=length(table((dataForReport[["mafProcessed"]]$variantMafOncoPlot@data[,..clinicalFeaturesOne])))
+  if (clinicalFeaturesOneSize<99) {
     plot.new()
     oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeaturesOne,sortByAnnotation=TRUE)
+  } else {
+    print(paste0("clinicalFeature ",clinicalFeaturesOne," has too many groups: ",clinicalFeaturesOneSize, ". Reduce it to less than 99 for Oncoplots"))
+  }
+    
 }
 
 ```
@@ -82,8 +88,13 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
   
 ```{r,fig.width=9,fig.height=9}
 for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
+  clinicalFeaturesOneSize=length(table((dataForReport[["maf"]]@data[,..clinicalFeaturesOne])))
+  if (clinicalFeaturesOneSize<99) {
   plot.new()
   oncoplot(maf = dataForReport[["maf"]], top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeaturesOne,sortByAnnotation=TRUE)
+  } else {
+    print(paste0("clinicalFeature ",clinicalFeaturesOne," has too many groups: ",clinicalFeaturesOneSize, ". Reduce it to less than 99 for Oncoplots"))
+  }
 
 }
 ```
