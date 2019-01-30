@@ -1,6 +1,8 @@
 
 # Group/Family summary
 
+Top 200 variants/genes will be listed in the tables:
+
 <!-- ## Variants in Family/Group -->
 ```{r}
 if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
@@ -10,6 +12,14 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
   out<-list()
   
   for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
+    #This is from clinic information data, too large sometimes, not using this way.
+    #clinicalFeaturesOneSize=table(dataForReport[["maf"]]@clinical.data[,..clinicalFeaturesOne])
+    temp=unique(maf[,.(Tumor_Sample_Barcode,get(clinicalFeaturesOne))])
+    clinicalFeaturesOneSize=table(temp[,2])
+    if (any(clinicalFeaturesOneSize<2)) {
+      maf[[clinicalFeaturesOne]][which(maf[[clinicalFeaturesOne]] %in% names(which(clinicalFeaturesOneSize<2)))]=NA
+    }
+    
     #N
     #vt = maf[,.N, .(Hugo_Symbol,HGVSp_Short, family )]
 #    cat(paste0("### ",clinicalFeaturesOne,"\n"))
@@ -19,22 +29,44 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
     vt.cast = data.table::dcast(data = vt, formula = castFormula, value.var = 'N', fill = 0)
 #    vt.cast = vt.cast[,total:=rowSums(vt.cast[,(length(dataForReport[["vIdCol"]])+1):ncol(vt.cast), with = FALSE])][order(total, decreasing = TRUE)]
     vt.cast = vt.cast[,Occur:=apply(vt.cast[,(length(dataForReport[["vIdCol"]])+1):ncol(vt.cast), with = FALSE],1,function(x) length(which(x>0)))][order(Occur, decreasing = TRUE)]
+    
+    #add group size to group name
+    temp=intersect(colnames(vt.cast),names(clinicalFeaturesOneSize))
+    if (length(temp)>0) {
+      nameInd=which(colnames(vt.cast) %in% temp)
+      colnames(vt.cast)[nameInd]=paste0(colnames(vt.cast)[nameInd]," (",clinicalFeaturesOneSize[colnames(vt.cast)[nameInd]],")")
+    }
+    #Comment this as you don't know how many patients don't have family information
+    # if ("NA" %in% colnames(vt.cast)) {
+    #   colnames(vt.cast)[which(colnames(vt.cast)=="NA")]=paste0("Other or No Family (",sum(clinicalFeaturesOneSize)-sum(clinicalFeaturesOneSize[temp]),")")
+    # }
+    
     out<-append(out,list(makeDataTable(vt.cast[1:200,])))
     
     #Percent
-    temp=unique(maf[,.(Tumor_Sample_Barcode,get(clinicalFeaturesOne))])
-    clinicalFeaturesOneSize=table(temp[,2])
+#    temp=unique(maf[,.(Tumor_Sample_Barcode,get(clinicalFeaturesOne))])
+#    clinicalFeaturesOneSize=table(temp[,2])
     vt$N.Percent=round(vt$N/clinicalFeaturesOneSize[vt[,get(clinicalFeaturesOne)]],2)
     vtCastPercent = data.table::dcast(data = vt, formula = castFormula, value.var = 'N.Percent', fill = 0)
     vtCastPercent = vtCastPercent[,OccurInAll:=apply(vtCastPercent[,(length(dataForReport[["vIdCol"]])+1):ncol(vtCastPercent), with = FALSE],1,function(x) length(which(x==1)))][order(OccurInAll, decreasing = TRUE)]
+    
+    #add group size to group name
+    temp=intersect(colnames(vtCastPercent),names(clinicalFeaturesOneSize))
+    if (length(temp)>0) {
+      nameInd=which(colnames(vtCastPercent) %in% temp)
+      colnames(vtCastPercent)[nameInd]=paste0(colnames(vtCastPercent)[nameInd]," (",clinicalFeaturesOneSize[colnames(vtCastPercent)[nameInd]],")")
+    }
     out<-append(out,list(makeDataTable(vtCastPercent[1:200,])))
     
   }
   tagList(out)
 }
+cat("\n")
 ```
 
+
 ## Oncoplots about variants, sort by Family/Group
+
 ```{r,fig.width=9,fig.height=9}
 for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
   clinicalFeaturesOneSize=length(table((dataForReport[["mafProcessed"]]$variantMafOncoPlot@data[,..clinicalFeaturesOne])))
@@ -61,6 +93,12 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
   for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
     out<-append(out,list(tags[["h3"]](paste0(clinicalFeaturesOne))))
     
+    temp=unique(maf[,.(Tumor_Sample_Barcode,get(clinicalFeaturesOne))])
+    clinicalFeaturesOneSize=table(temp[,2])
+    if (any(clinicalFeaturesOneSize<2)) {
+      maf[[clinicalFeaturesOne]][which(maf[[clinicalFeaturesOne]] %in% names(which(clinicalFeaturesOneSize<2)))]=NA
+    }
+    
     #N
     #sometimes more than one variant on same gene on the patient, need to remove
     temp=c("Hugo_Symbol","Tumor_Sample_Barcode",clinicalFeaturesOne)
@@ -69,20 +107,34 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
     castFormula=as.formula(paste0("Hugo_Symbol","~",clinicalFeaturesOne))
     vt.cast = data.table::dcast(data = vt, formula = castFormula, value.var = 'N', fill = 0)
     vt.cast = vt.cast[,Occur:=apply(vt.cast[,2:ncol(vt.cast), with = FALSE],1,function(x) length(which(x>0)))][order(Occur, decreasing = TRUE)]
+    #add group size to group name
+    temp=intersect(colnames(vt.cast),names(clinicalFeaturesOneSize))
+    if (length(temp)>0) {
+      nameInd=which(colnames(vt.cast) %in% temp)
+      colnames(vt.cast)[nameInd]=paste0(colnames(vt.cast)[nameInd]," (",clinicalFeaturesOneSize[colnames(vt.cast)[nameInd]],")")
+    }
     out<-append(out,list(makeDataTable(vt.cast[1:200,])))
     
     #Percent
-    temp=unique(maf[,.(Tumor_Sample_Barcode,get(clinicalFeaturesOne))])
-    clinicalFeaturesOneSize=table(temp[,2])
+#    temp=unique(maf[,.(Tumor_Sample_Barcode,get(clinicalFeaturesOne))])
+#    clinicalFeaturesOneSize=table(temp[,2])
     vt$N.Percent=round(vt$N/clinicalFeaturesOneSize[vt[,get(clinicalFeaturesOne)]],2)
     vtCastPercent = data.table::dcast(data = vt, formula = castFormula, value.var = 'N.Percent', fill = 0)
     vtCastPercent = vtCastPercent[,OccurInAll:=apply(vtCastPercent[,2:ncol(vtCastPercent), with = FALSE],1,function(x) length(which(x==1)))][order(OccurInAll, decreasing = TRUE)]
+    #add group size to group name
+    temp=intersect(colnames(vtCastPercent),names(clinicalFeaturesOneSize))
+    if (length(temp)>0) {
+      nameInd=which(colnames(vtCastPercent) %in% temp)
+      colnames(vtCastPercent)[nameInd]=paste0(colnames(vtCastPercent)[nameInd]," (",clinicalFeaturesOneSize[colnames(vtCastPercent)[nameInd]],")")
+    }
+    
     out<-append(out,list(makeDataTable(vtCastPercent[1:200,])))
     
   }
   tagList(out)
 }
 ```
+
 
 ## Oncoplots about Genes, sort by Family/Group
   
