@@ -16,7 +16,9 @@ if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
 ```{r}
 if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
   makeDataTable(mafOncodrive[,c("Hugo_Symbol",setdiff(colnames(mafOncodrive),colnames(dataForReport[["maf"]]@gene.summary))),with = FALSE])
-  plotOncodrive(res = mafOncodrive, fdrCutOff = 0.05, useFraction = TRUE)
+  
+  fdrCut=max(sort(mafOncodrive$fdr)[5]+0.00000001,0.05) #make sure fdrCut can include at least 5 points for plot
+  plotOncodrive(res = mafOncodrive, fdrCutOff = fdrCut, useFraction = TRUE)
 }
 ```
 
