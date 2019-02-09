@@ -70,7 +70,7 @@ cat("\n")
 ```{r,fig.width=9,fig.height=9}
 for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
   clinicalFeaturesOneSize=length(table((dataForReport[["mafProcessed"]]$variantMafOncoPlot@data[,..clinicalFeaturesOne])))
-  if (clinicalFeaturesOneSize<99) {
+  if (clinicalFeaturesOneSize<=99) {
     plot.new()
     oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeaturesOne,sortByAnnotation=TRUE)
   } else {
@@ -141,7 +141,7 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
 ```{r,fig.width=9,fig.height=9}
 for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
   clinicalFeaturesOneSize=length(table((dataForReport[["maf"]]@data[,..clinicalFeaturesOne])))
-  if (clinicalFeaturesOneSize<99) {
+  if (clinicalFeaturesOneSize<=99) {
   plot.new()
   oncoplot(maf = dataForReport[["maf"]], top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeaturesOne,sortByAnnotation=TRUE)
   } else {
