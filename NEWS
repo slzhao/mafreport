@@ -1,3 +1,10 @@
+CHANGES IN VERSION 0.1.7 2019-05-21
+------------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o Bugs in prepareVariantOncoPlot function Fixed.
+
 CHANGES IN VERSION 0.1.6 2019-02-08
 ------------------------------------
 
