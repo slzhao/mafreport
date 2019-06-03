@@ -69,7 +69,11 @@ cat("\n")
 
 ```{r,fig.width=9,fig.height=9}
 for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
-  clinicalFeaturesOneSize=length(table((dataForReport[["mafProcessed"]]$variantMafOncoPlot@data[,..clinicalFeaturesOne])))
+  clinicalFeaturesOneGroups=table((dataForReport[["mafProcessed"]]$variantMafOncoPlot@data[,..clinicalFeaturesOne]))
+  clinicalFeaturesOneSize=length(which(clinicalFeaturesOneGroups>0))
+  if (clinicalFeaturesOneSize==0) {
+    print(paste0("clinicalFeature ",clinicalFeaturesOne," has too few unique groups: ",clinicalFeaturesOneSize, ". Skip Oncoplots"))
+  }
   if (clinicalFeaturesOneSize<=99) {
     plot.new()
     oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeaturesOne,sortByAnnotation=TRUE)

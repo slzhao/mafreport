@@ -48,9 +48,16 @@ if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
 ```{r,results='markup'}
 if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
   cat("## Oncogenic Signaling Pathways\n")
-  mafOncogenicPathways = OncogenicPathways(maf = dataForReport[["maf"]])
-plot(mafOncogenicPathways)
-PlotOncogenicPathways(maf = dataForReport[["maf"]], pathways = mafOncogenicPathways$data$Pathway[1])
+  mafOncogenicPathways = capture.output(OncogenicPathways(maf = dataForReport[["maf"]]))
+#plot(mafOncogenicPathways)
+  mafOncogenicPathways=fread(text=mafOncogenicPathways)
+  if (nrow(mafOncogenicPathways)>0) {
+    dataForPlot=head(mafOncogenicPathways,3)
+    for (i in 1:nrow(dataForPlot)) {
+      (PlotOncogenicPathways(maf = dataForReport[["maf"]], pathways = dataForPlot$Pathway[i]))
+    }
+  }
+
 }
 ```
 

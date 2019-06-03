@@ -99,7 +99,7 @@ if (length(dataForReport[["interestedGenes"]])>length(interestedGenesInDb)) {
 
 if (length(interestedGenesInDb)>0) {
   for (i in 1:length(interestedGenesInDb)) {
-    print(lollipopPlot(maf = dataForReport[["maf"]], gene = interestedGenesInDb[i], AACol = dataForReport[["AACol"]], showMutationRate = TRUE))
+    try(print(lollipopPlot(maf = dataForReport[["maf"]], gene = interestedGenesInDb[i], AACol = dataForReport[["AACol"]], showMutationRate = TRUE)))
   }
 } else {
     warning(paste0("Zero genes recored in protein_domains database, no Lollipop plots"))
