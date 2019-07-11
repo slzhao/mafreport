@@ -72,13 +72,7 @@ dataForReport=initialize_maf_report_parameter(mafFile,reportOutDir=reportOutDir,
 mafFile="/scratch/cqs/shengq2/macrae_linton/20190517_linton_exomeseq_3321_human/bwa_refine_gatk4_hc_gvcf_vqsr_filterMAF_annovar_filter_toMAF/result/linton_exomeseq_3321.freq0.001.filtered.tsv.maf"
 clinicalData="/scratch/cqs/shengq2/macrae_linton/20180913_linton_exomeseq_2118_human_cutadapt/linton_exomeseq_2118.pass.family.txt"
 clinicalFeatures="family"
-interestedGeneStr="LDLR APOB PCSK9 LDLRAP1 STAP1 LIPA ABCG5 ABCGB APOE LPA PNPLA5 CH25H INSIG2 SIRT1"
-if(!is.null(interestedGeneStr)) {
-  interestedGeneStr = gsub("\\s+", ",", interestedGeneStr)
-  interestedGenes = unlist(strsplit(interestedGeneStr, ","))
-}else{
-  interestedGenes = NULL
-}
+interestedGeneStr=c("LDLR","APOB","PCSK9","LDLRAP1","STAP1","LIPA","ABCG5","ABCGB","APOE","LPA","PNPLA5","CH25H","INSIG2","SIRT1")
 dataForReport=initialize_maf_report_parameter(mafFile,reportOutDir=reportOutDir,
                                               vc_nonSyn=c("Frame_Shift_Del", "Frame_Shift_Ins", "Splice_Site", "Translation_Start_Site",
                                                           "Nonsense_Mutation",	"Nonstop_Mutation", "Missense_Mutation"),
@@ -104,7 +98,7 @@ dataForReport=initialize_maf_report_parameter(mafFile,reportOutDir=reportOutDir,
 )
 
 ##Example for JarVarDict and hg38. Pierre's WES project
-mafFile="/gpfs23/scratch/cqs/zhaos/Pierre/WES/20190509_VarDict_vcf2maf/20190522_LungWesUmiVcfToMaf.all.subset.maf"
+mafFile="/gpfs23/scratch/cqs/zhaos/Pierre/WES/20190509_VarDict_vcf2maf/20190522_LungWesUmiVcfToMaf.all.subset.noError.maf"
 reportOutDir="/gpfs23/scratch/cqs/zhaos/Pierre/WES/20190509_VarDict_vcf2maf/"
 dataForReport=initialize_maf_report_parameter(mafFile,reportOutDir=reportOutDir,genome="hg38",
                                                #reportModules=c("Initialize.Rmd","SummaryTables.Rmd","VariantsVisualization.Rmd","HighFreqVariantsCheck.Rmd"),

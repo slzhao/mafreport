@@ -18,7 +18,18 @@ if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
   makeDataTable(mafOncodrive[,c("Hugo_Symbol",setdiff(colnames(mafOncodrive),colnames(dataForReport[["maf"]]@gene.summary))),with = FALSE])
   
   fdrCut=max(sort(mafOncodrive$fdr)[5]+0.00000001,0.05) #make sure fdrCut can include at least 5 points for plot
-  plotOncodrive(res = mafOncodrive, fdrCutOff = fdrCut, useFraction = TRUE)
+  
+  if (nrow(mafOncodrive)>200) {
+    plotInd=1:200
+    warning(paste0("Too many Oncodrive clusters: ",nrow(mafOncodrive),". Only top 200 were plotted. See table above for more details."))
+    print(paste0("Too many Oncodrive clusters: ",nrow(mafOncodrive),". Only top 200 were plotted. See table above for more details."))
+  } else {
+    plotInd=1:nrow(mafOncodrive)
+  }
+  if (0) { #Too slow now. Not to do plot at this time
+    plotOncodrive(res = mafOncodrive[plotInd,], fdrCutOff = fdrCut, useFraction = TRUE)
+  }
+  
 }
 ```
 
@@ -136,15 +147,20 @@ if (!is.null(dataForReport[["dndscv.refdb"]])) {
   GenomeInfoDb::seqlevelsStyle(dataForModel$Chromosome)=genomePkgStype
   #colnames(dataForModel)<-c("sampleID","chr","pos","ref","alt")
 
-  dndsout = dndscv::dndscv(dataForModel,cv=NULL,refdb=dataForReport[["dndscv.refdb"]],use_indel_sites=FALSE)
+  dndsout=try(dndscv::dndscv(dataForModel,cv=NULL,refdb=dataForReport[["dndscv.refdb"]],use_indel_sites=FALSE))
   #print(names(dndsout))
-
-  makeDataTable(dndsout$sel_cv[1:500,])
+  
+  if (class(dndsout)!="try-error") {
+    makeDataTable(dndsout$sel_cv[1:500,])
+  }
+  
 #  kable(dndsout$globaldnds,row.names=FALSE)
 }
 
 if (!is.null(dataForReport[["dndscv.refdb"]])) {  #have to be in a seprate section to make sure makeDataTable(dndsout$sel_cv[1:500,]) can display
-  kable(dndsout$globaldnds,row.names=FALSE)
+  if (class(dndsout)!="try-error") {
+    kable(dndsout$globaldnds,row.names=FALSE)
+  }
 }
 ```
 
