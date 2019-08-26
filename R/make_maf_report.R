@@ -53,6 +53,7 @@ initialize_maf_report_parameter<-
 #' @export
 make_maf_report<-function(dataForReport) {
   dataForReport=dataForReport
-  render(dataForReport[["reportTemplate"]],output_dir=dataForReport[["reportOutDir"]], output_file =dataForReport[["reportOut"]])
+  render(dataForReport[["reportTemplate"]],output_dir=dataForReport[["reportOutDir"]], output_file =dataForReport[["reportOut"]],
+         intermediates_dir=tempdir())
   return(dataForReport)
 }

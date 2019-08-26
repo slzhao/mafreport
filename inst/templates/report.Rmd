@@ -35,7 +35,8 @@ reportModules=dataForReport[["reportModules"]]
 reportModules=reportModules[reportModules!="Initialize.Rmd"]
 out = NULL
 
-for (i in 1:length(reportModules)) {
+if (length(reportModules)>0) {
+  for (i in 1:length(reportModules)) {
   rmdFile=reportModules[i]
   if (file.exists(rmdFile)) {
     message(paste0("Working in ",rmdFile))
@@ -45,6 +46,8 @@ for (i in 1:length(reportModules)) {
   }
   
 }
+}
+
 
 
 ```
