@@ -134,6 +134,15 @@ if (!is.null(dataForReport[["dndscv.refdb"]])) {
 #  library(dndscv)
   mafDatSnp=rbind(dataForReport[["maf"]]@data,dataForReport[["maf"]]@maf.silent)
   #mafDatSnp=mafDatSnp[which(mafDatSnp$Variant_Type=="SNP"),]
+  
+  #remove In_Frame_Del or In_Frame_Ins in DnDs analysis if they were not considered as vc_nonSyn
+  if (!("In_Frame_Del" %in% dataForReport$vc_nonSyn)) {
+    mafDatSnp=mafDatSnp[which(! mafDatSnp$Variant_Classification %in% c("In_Frame_Del")),]
+  }
+  if (!("In_Frame_Ins" %in% dataForReport$vc_nonSyn)) {
+    mafDatSnp=mafDatSnp[which(! mafDatSnp$Variant_Classification %in% c("In_Frame_Ins")),]
+  }
+  
   dataForModel=mafDatSnp[,.(Tumor_Sample_Barcode ,Chromosome,Start_Position,Reference_Allele,Tumor_Seq_Allele2)]
   dataForModel$Chromosome=as.character(dataForModel$Chromosome)
 
