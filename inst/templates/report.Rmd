@@ -33,7 +33,8 @@ options(width = 3000)
 #run all selected modules except Initialize.Rmd
 reportModules=dataForReport[["reportModules"]]
 reportModules=reportModules[reportModules!="Initialize.Rmd"]
-out = NULL
+#out = NULL
+out = ""
 
 if (length(reportModules)>0) {
   for (i in 1:length(reportModules)) {
