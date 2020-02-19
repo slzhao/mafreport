@@ -35,7 +35,7 @@ prepareVariantOncoPlot<-function(mafObj,AACol="HGVSp_Short") {
   temp=paste0(dataForPlot@data[,Hugo_Symbol],"_",dataForPlot@data[,get(AACol)])
   dataForPlot@data$Hugo_Symbol=temp
   dataForPlot@gene.summary =
-    maftools:::summarizeMaf(maf = subsetMaf(maf = dataForPlot, fields = 'Hugo_Symbol', includeSyn = FALSE,mafObj = FALSE), chatty = FALSE)[[c("gene.summary")]]
+    maftools:::summarizeMaf(maf = subsetMaf(maf = dataForPlot, fields = 'Hugo_Symbol', includeSyn = FALSE,mafObj = FALSE,genes=unique(temp)), chatty = FALSE)[[c("gene.summary")]]
   return(dataForPlot)
 }
 

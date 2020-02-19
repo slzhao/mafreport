@@ -1,3 +1,10 @@
+CHANGES IN VERSION 0.2.0 2020-02-19
+------------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o Bugs Fixed to work with maftools and data.table updates.
+
 CHANGES IN VERSION 0.1.7 2019-05-21
 ------------------------------------
 

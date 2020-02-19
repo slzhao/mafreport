@@ -106,7 +106,7 @@ if (!("performAnalysis" %in% names(dataForReport))) {
 }
 
 if (!("AACol" %in% names(dataForReport))) {
-  preDefinedAACol=c("HGVSp_Short", "Protein_Change", "AAChange")
+  preDefinedAACol=c("HGVSp_Short", "Protein_Change","aaChange", "AAChange")
   temp=intersect(preDefinedAACol,colnames(dataForReport[["maf"]]@data))
   if (length(temp)>0) {
     dataForReport[["AACol"]]=temp[1]
@@ -121,7 +121,7 @@ if (!("vIdCol" %in% names(dataForReport))) {
 
 #summary variant
 dataForReport[["mafProcessed"]]$variantCountSummary=summaryVariant(dataForReport[["maf"]],vIdCol=dataForReport[["vIdCol"]])
-#summary variant
+#summary variant for gene AA change level OncoPlot
 dataForReport[["mafProcessed"]]$variantMafOncoPlot=prepareVariantOncoPlot(dataForReport[["maf"]],AACol=dataForReport[["AACol"]])
 
 ```

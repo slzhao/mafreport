@@ -14,7 +14,9 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
   for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
     #This is from clinic information data, too large sometimes, not using this way.
     #clinicalFeaturesOneSize=table(dataForReport[["maf"]]@clinical.data[,..clinicalFeaturesOne])
-    temp=unique(maf[,.(Tumor_Sample_Barcode,get(clinicalFeaturesOne))])
+    selectedVars=c("Tumor_Sample_Barcode",clinicalFeaturesOne)
+    temp=unique(maf[,..selectedVars])
+    #temp=unique(maf[,.(Tumor_Sample_Barcode,get(clinicalFeaturesOne))])
     clinicalFeaturesOneSize=table(temp[,2])
     if (any(clinicalFeaturesOneSize<2)) {
       maf[[clinicalFeaturesOne]][which(maf[[clinicalFeaturesOne]] %in% names(which(clinicalFeaturesOneSize<2)))]=NA
