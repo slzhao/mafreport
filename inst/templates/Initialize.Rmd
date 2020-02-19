@@ -59,9 +59,14 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
 #Interested Genes: If defined, overlap with mutation genes. If not, use top 10 genes
 if ("interestedGenes" %in% names(dataForReport) & !is.null(dataForReport[["interestedGenes"]])) {
   dataForReport[["interestedGenes"]] = intersect(dataForReport[["interestedGenes"]],getGeneSummary(x = dataForReport[["maf"]])[, Hugo_Symbol])
+  if (length(dataForReport[["interestedGenes"]])==0) {
+      warning("No overlap between predefined interestedGenes and genes with mutation. Use top 10 genes as interestedGenes.")
+      dataForReport[["interestedGenes"]] = getGeneSummary(x = dataForReport[["maf"]])[1:10, Hugo_Symbol]
+  }
 } else {
   dataForReport[["interestedGenes"]] = getGeneSummary(x = dataForReport[["maf"]])[1:10, Hugo_Symbol]
 }
+
 
 #Vaf perform analysis Y/N and caculation
 if (!("performVaf" %in% names(dataForReport)) || dataForReport[["performVaf"]]) { #Not defined or dataForReport[["performVaf"]]==TRUE
