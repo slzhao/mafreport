@@ -42,16 +42,16 @@ dataForReport=initialize_maf_report_parameter(mafFile,reportOutDir=reportOutDir,
                                                reportModules=c("Initialize.Rmd"))
 
 #Example for GATK. Tim's Exome sequence project
-mafFile="/gpfs23/scratch/h_vangard_1/daix4/Test_Bai/exome/result_exome/bwa_refine_gatk4_hc_gvcf_vqsr_filterMAF_annovar_filter_toMAF_MAFtools/pbs/exon.freq0.001.filtered.tsv.maf.txt"
-clinicalData="/gpfs23/scratch/h_vangard_1/daix4/Test_Bai/exome/result_exome/bwa_refine_gatk4_hc_gvcf_vqsr_filterMAF_annovar_filter_toMAF_MAFtools/pbs/family.info"
+mafFile="/scratch/cqs/baiy7/Tim_proj/IPF_new_WES/analysis/_IPF_new_WES_result_reseq_exLCR/bwa_refine_gatk4_SNV_09_toMAF/result/IPF_new_WES.freq0.001.filtered.tsv.maf"
+clinicalData="/gpfs23/scratch/cqs/baiy7/Tim_proj/IPF_new_WES/analysis/_IPF_new_WES_result_reseq_exLCR/bwa_refine_gatk4_SNV_10_report/result/familyInfo.txt"
 clinicalFeatures="Family"
 dataForReport=initialize_maf_report_parameter(mafFile,reportOutDir=reportOutDir,
                                                vc_nonSyn=c("Frame_Shift_Del", "Frame_Shift_Ins", "Splice_Site", "Translation_Start_Site",
                                                            "Nonsense_Mutation",	"Nonstop_Mutation", "Missense_Mutation"),
                                                interestedGenes=c("TERT","RTEL1","DKC1","PARN"),
                                                clinicalData=clinicalData,
-                                               clinicalFeatures=clinicalFeatures
-                                               #		reportModules=c("Initialize.Rmd","SummaryTables.Rmd","GroupSummary.Rmd")
+                                               clinicalFeatures=clinicalFeatures,
+                                               reportModules=c("Initialize.Rmd","SummaryTables.Rmd","GroupSummary.Rmd")
 )
 
 
