@@ -5,7 +5,7 @@ dataForPlot=dataForReport[["maf"]]
 temp=paste0(dataForPlot@data[,Hugo_Symbol],"_",dataForPlot@data[,get(dataForReport[["AACol"]])])
 dataForPlot@data$Hugo_Symbol=temp
 
-dataForPlot@gene.summary = maftools:::summarizeMaf(maf = subsetMaf(maf = dataForPlot, fields = 'Hugo_Symbol', includeSyn = FALSE,mafObj = FALSE), chatty = FALSE)[[c("gene.summary")]]
+dataForPlot@gene.summary = maftools:::summarizeMaf(maf = subsetMaf(maf = dataForPlot, fields = 'Hugo_Symbol', includeSyn = FALSE,mafObj = FALSE,genes=unique(temp)), chatty = FALSE)[[c("gene.summary")]]
 
 
 #Top 20 FLAGS - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4267152/
