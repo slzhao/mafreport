@@ -157,5 +157,54 @@ for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
 }
 ```
 
+## Mutation burden by Family/Group
+
+```{r,fig.width=9,fig.height=9,warning=FALSE}
+#test
+testEachGroup=function(x,groups,test=wilcox.test) {
+  uniqueGroups=unique(groups)
+  
+  resultAll=NULL
+  for (i in 1:(length(uniqueGroups)-1)) {
+    for (j in (i+1):length(uniqueGroups)) {
+      group1=uniqueGroups[i]
+      group2=uniqueGroups[j]
+#      print(paste0(group1, " vs ",group2))
+#      print(x[which(groups==group1)])
+#      print(x[which(groups==group2)])
+      testP=test(x[which(groups==group1)],x[which(groups==group2)])$p.value
+      resultAll=rbind(resultAll,c(group1,group2,round(testP,4)))
+    }
+  }
+  colnames(resultAll)=c("Group1","Group2","Test P value")
+  return(resultAll)
+}
+
+
+for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
+  clinicalFeaturesOneSize=length(table((dataForReport[["maf"]]@data[,..clinicalFeaturesOne])))
+  if (clinicalFeaturesOneSize<=6) { #maxmial 6 groups
+    #mutationTypePerSampleCount=cbind(dataForReport[["maf"]]@variant.classification.summary,dataForReport[["maf"]]@variant.type.summary)
+    mutationTypePerSampleCount=dataForReport[["maf"]]@variant.type.summary
+    dataForPlot=cbind(mutationTypePerSampleCount,dataForReport[["maf"]]@clinical.data[as.character(mutationTypePerSampleCount$Tumor_Sample_Barcode),][[clinicalFeaturesOne]])
+    names(dataForPlot)[ncol(dataForPlot)]=clinicalFeaturesOne
+    
+    for (varType in names(dataForPlot)[-c(1,ncol(dataForPlot))]) {
+        #varType="total"
+        p=ggplot(dataForPlot)+geom_boxplot(aes_string(x=clinicalFeaturesOne,y=varType))+ggtitle(varType)
+        plot(p)
+        result=testEachGroup(dataForPlot[[varType]],as.character(dataForPlot[[clinicalFeaturesOne]]),test=wilcox.test)
+        knitr::kable(result,caption = paste0("Number of ",varType," mutations Comparison by Wilcox Rank Sum test"))
+    }
+  }
+
+}
+```
+
+
+
+
+
+
 
 
