@@ -74,29 +74,32 @@ if (!("performVaf" %in% names(dataForReport)) || dataForReport[["performVaf"]]) 
   caculateVaf=FALSE
   
   if ("vafCol" %in% names(dataForReport)) { #defined vafCol
-    vafCol=interesct(dataForReport[["vafCol"]],getFields(dataForReport[["maf"]]))
+    vafCol=intersect(dataForReport[["vafCol"]],getFields(dataForReport[["maf"]]))
      if (length(vafCol)==0) { #defined vafCol NOT in maf data column
        message(paste0("Defined vafCol as ",dataForReport[["vafCol"]]," but not found in maf." ))
        caculateVaf=TRUE
      } else {
-       vafCol=vafCol[1]
+       dataForReport[["vafCol"]]=vafCol[1]
        caculateVaf=FALSE
      }
   } else { #Not defined vafCol
       caculateVaf=TRUE
   }
   if (caculateVaf) {
-    if (all(c("t_alt_count","t_depth") %in% getFields(dataForReport[["maf"]]))) {
-      message("Cacualting Vaf based on Alt/Depth count and recording in t_vaf column")
+    if (all(c("t_alt_count") %in% getFields(dataForReport[["maf"]])) & any(c("t_ref_count","t_depth") %in% getFields(dataForReport[["maf"]]))) {
+      message("Cacualting Vaf based on Alt/Depth or Alt/(Ref+Alt) count and recording in t_vaf column")
       dataForReport[["vafCol"]]="t_vaf"
     
-      #dataForReport[["maf"]]@data[,t_vaf:=dataForReport[["maf"]]@data[,t_alt_count]/(dataForReport[["maf"]]@data[,t_alt_count]+dataForReport[["maf"]]@data[,t_ref_count])]
-      dataForReport[["maf"]]@data[,t_vaf:=dataForReport[["maf"]]@data[,t_alt_count]/as.integer(dataForReport[["maf"]]@data[,t_depth])]
+      if ("t_depth" %in% getFields(dataForReport[["maf"]])) { #use Alt/Depth
+          dataForReport[["maf"]]@data[,t_vaf:=dataForReport[["maf"]]@data[,t_alt_count]/as.integer(dataForReport[["maf"]]@data[,t_depth])]
+          dataForReport[["maf"]]@maf.silent[,t_vaf:=dataForReport[["maf"]]@maf.silent[,t_alt_count]/as.integer(dataForReport[["maf"]]@maf.silent[,t_depth])]
+      } else { #use Alt/(Ref+Alt)
+          dataForReport[["maf"]]@data[,t_vaf:=dataForReport[["maf"]]@data[,t_alt_count]/(dataForReport[["maf"]]@data[,t_alt_count]+dataForReport[["maf"]]@data[,t_ref_count])]
+          dataForReport[["maf"]]@maf.silent[,t_vaf:=dataForReport[["maf"]]@maf.silent[,t_alt_count]/(dataForReport[["maf"]]@maf.silent[,t_alt_count]+dataForReport[["maf"]]@maf.silent[,t_ref_count])]
+      }
       
-      #dataForReport[["maf"]]@maf.silent[,t_vaf:=dataForReport[["maf"]]@maf.silent[,t_alt_count]/(dataForReport[["maf"]]@maf.silent[,t_alt_count]+dataForReport[["maf"]]@maf.silent[,t_ref_count])]
-            dataForReport[["maf"]]@maf.silent[,t_vaf:=dataForReport[["maf"]]@maf.silent[,t_alt_count]/as.integer(dataForReport[["maf"]]@maf.silent[,t_depth])]
     } else {
-      warning(paste0("Try to cacualte Vaf based on Alt/Depth count"," but t_alt_count or t_depth not found in maf." ))
+      warning(paste0("Try to cacualte Vaf based on Alt/Depth count"," but t_alt_count or t_depth or t_ref_count not found in maf." ))
       dataForReport[["performVaf"]]=FALSE
     }
   }
