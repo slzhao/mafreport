@@ -41,89 +41,105 @@ prepareVariantOncoPlot<-function(mafObj,AACol="HGVSp_Short") {
 
 #Filter MAF file
 #' @export
-filterMaf=function(mafFile,mafMax=0.001,OrDefinedKeepCol=NULL,ExAC_FILTER=TRUE,variantInSampleMaxPercent=0.9) {
-	maf=read.maf(mafFile,verbose=TRUE)
-	matSubsetObj=maf
-	mafRemovedTable=NULL
+filterMaf=function(mafFile,
+                   mafCol=c("AF","ExAC_AF","gnomAD_AF","gnomAD_exome_AF","gnomAD_genome_AF"),mafMax=0.001,
+                   OrDefinedKeepCol=NULL,
+                   ExAC_FILTER=TRUE,ExAC_FILTER_Col=c("ExAC_FILTER","gnomAD_exome_FILTER","gnomAD_genome_FILTER"),
+                   variantInSampleMaxPercent=0.9) {
+  mafTable=fread(cmd=paste0('grep -v "#" ',mafFile),quote="")
+  maf=read.maf(mafTable,verbose=TRUE)
 
-	#MAF max
-	if (!is.null(mafMax)) {
-		mafCol=c("AF","ExAC_AF","gnomAD_AF")
-		temp1=paste0(mafCol,"<",mafMax)
-		temp2=paste0("is.na(",mafCol,")")
-		temp3=paste0("(",temp1," | ",temp2,")")
-		queryExp=paste0("(",paste(temp3,collapse=" & "),")")
-	} else {
-		queryExp=""
-	}
+  matSubsetObj=maf
+  mafRemovedTable=NULL
 
-	if (!is.null(OrDefinedKeepCol[1])) {
-		#Somatic (Cosmic)
-		#OrDefinedKeepCol=="SOMATIC"
-		##queryExp=paste0(queryExp," | ",'(SOMATIC!="")')
-		#queryExp=paste0(queryExp," | (",OrDefinedKeepCol,'!="")')
-	}
+  #MAF max
+  mafCol=intersect(mafCol,colnames(maf@data))
+  if (!is.null(mafMax) & length(mafCol)>0) {
+    print(paste0(mafCol))
+    temp1=paste0(mafCol,"<",mafMax)
+    temp2=paste0("is.na(",mafCol,")")
+    temp3=paste0("(",temp1," | ",temp2,")")
+    queryExp=paste0("(",paste(temp3,collapse=" & "),")")
+  } else {
+    queryExp=""
+  }
 
-	if (ExAC_FILTER) {
-		#Exac Filter
-#matSubsetObj@data$ExAC_FILTER
-		queryExp=paste0(queryExp," & ",'(ExAC_FILTER=="" | ExAC_FILTER=="PASS" | is.na(ExAC_FILTER))')
-	}
+  if (!is.null(OrDefinedKeepCol[1])) {
+    #Somatic (Cosmic)
+    #OrDefinedKeepCol=="SOMATIC"
+    ##queryExp=paste0(queryExp," | ",'(SOMATIC!="")')
+    #queryExp=paste0(queryExp," | (",OrDefinedKeepCol,'!="")')
+  }
 
-	print(queryExp)
-#matDataSubset=subsetMaf(maf = dataForReport[["maf"]], query = queryExp,includeSyn=TRUE)
+  ExAC_FILTER_Col=intersect(ExAC_FILTER_Col,colnames(maf@data))
+  if (ExAC_FILTER & length(ExAC_FILTER_Col)>0) {
+    #Exac Filter
+    #matSubsetObj@data$ExAC_FILTER
+    for (ExAC_FILTER_Col_One in ExAC_FILTER_Col) {
+      queryExpOne=paste0('(',ExAC_FILTER_Col_One,'=="" | ',ExAC_FILTER_Col_One,'=="PASS" | is.na(',ExAC_FILTER_Col_One,'))')
+      queryExp=paste0(queryExp," & ",queryExpOne)
+    }
+    #    queryExp=paste0(queryExp," & ",'(ExAC_FILTER=="" | ExAC_FILTER=="PASS" | is.na(ExAC_FILTER))')
+  }
 
-	matSubsetObjKept=subsetMaf(maf = matSubsetObj, query = queryExp,includeSyn=TRUE,mafObj=TRUE)
-	if (nrow(matSubsetObj@data)>nrow(matSubsetObjKept@data) | nrow(matSubsetObj@maf.silent)>nrow(matSubsetObjKept@maf.silent)) {
-	  temp=subsetMaf(maf = matSubsetObj, query =paste0("!(",queryExp,")") ,includeSyn=TRUE,mafObj=FALSE)
-	  mafRemovedTable<-rbind(mafRemovedTable,
-			  cbind(temp,RemovedQuery=rep(queryExp,nrow(temp)),RemovedTag=rep("PublicDatabase",nrow(temp)))
-	  )
-  	}
-	matSubsetObj=matSubsetObjKept
+  print(queryExp)
+  #matDataSubset=subsetMaf(maf = dataForReport[["maf"]], query = queryExp,includeSyn=TRUE)
 
-	if (!is.null(variantInSampleMaxPercent)) {
-		#remove variants within more than 90% samples
-		dataSampleN=as.integer(maf@summary["Samples",summary,on="ID"])
-		vIdCol=c("Hugo_Symbol","HGVSp_Short","Chromosome","Start_Position","End_Position","Reference_Allele","Tumor_Seq_Allele2")
+  matSubsetObjKept=subsetMaf(maf = matSubsetObj, query = queryExp,includeSyn=TRUE,mafObj=TRUE)
+  if (nrow(matSubsetObj@data)>nrow(matSubsetObjKept@data) | nrow(matSubsetObj@maf.silent)>nrow(matSubsetObjKept@maf.silent)) {
+    temp=subsetMaf(maf = matSubsetObj, query =paste0("!(",queryExp,")") ,includeSyn=TRUE,mafObj=FALSE)
+    mafRemovedTable<-rbind(mafRemovedTable,
+                           cbind(temp,RemovedQuery=rep(queryExp,nrow(temp)),RemovedTag=rep("PublicDatabase",nrow(temp)))
+    )
+  }
+  matSubsetObj=matSubsetObjKept
 
-		#Get variant summary function
-		##Need to load summaryVariant function in Rmd file
-		selectedVariantsDT=summaryVariant(matSubsetObj,vIdCol=vIdCol,includeSilent=TRUE)
-		selectedVariantsDT=selectedVariantsDT[which(selectedVariantsDT$N>dataSampleN*variantInSampleMaxPercent),..vIdCol]
-		#dim(selectedVariantsDT)
-		if (nrow(selectedVariantsDT)>0) {
-			print(paste0(nrow(selectedVariantsDT)," variants removed because exist in more than ",as.integer(variantInSampleMaxPercent*100),"% samples"))
-			for (i in 1:nrow(selectedVariantsDT)) {
-				queryExp=paste0("!(",paste(paste0(colnames(selectedVariantsDT),"=='",selectedVariantsDT[i,],"'"),collapse=" & "),")")
-				#print(queryExp)
+  if (!is.null(variantInSampleMaxPercent)) {
+    #remove variants within more than 90% samples
+    dataSampleN=as.integer(maf@summary["Samples",summary,on="ID"])
+    vIdCol=c("Hugo_Symbol","HGVSp_Short","Protein_Change","Chromosome","Start_Position","End_Position","Reference_Allele","Tumor_Seq_Allele2")
+    vIdCol=intersect(vIdCol,colnames(maf@data))
 
-				matSubsetObjKept=subsetMaf(maf = matSubsetObj, query = queryExp,includeSyn=TRUE,mafObj=TRUE)
-				if (nrow(matSubsetObj@data)>nrow(matSubsetObjKept@data) | nrow(matSubsetObj@maf.silent)>nrow(matSubsetObjKept@maf.silent)) {
-				  temp=subsetMaf(maf = matSubsetObj, query =paste0("!(",queryExp,")") ,includeSyn=TRUE,mafObj=FALSE)
-				  mafRemovedTable<-rbind(mafRemovedTable,
-						  				cbind(temp,RemovedQuery=rep(queryExp,nrow(temp)),RemovedTag=rep("HighFrequencyInData",nrow(temp)))
-								)
-				}
-				matSubsetObj=matSubsetObjKept
+    #Get variant summary function
+    ##Need to load summaryVariant function in Rmd file
+    selectedVariantsDT=summaryVariant(matSubsetObj,vIdCol=vIdCol,includeSilent=TRUE)
+    selectedVariantsDT=selectedVariantsDT[which(selectedVariantsDT$N>=max(dataSampleN*variantInSampleMaxPercent,2)),..vIdCol]
+    #dim(selectedVariantsDT)
+    if (nrow(selectedVariantsDT)>0) {
+      print(paste0(nrow(selectedVariantsDT)," variants removed because exist in more than ",as.integer(variantInSampleMaxPercent*100),"% samples"))
+      for (i in 1:nrow(selectedVariantsDT)) {
+        queryExp=paste0("!(",paste(paste0(colnames(selectedVariantsDT),"=='",selectedVariantsDT[i,],"'"),collapse=" & "),")")
+        #print(queryExp)
 
-			}
-		} else {
-			print(paste0("variantInSampleMaxPercent defined at ",as.integer(variantInSampleMaxPercent*100),"% but no variant was more than it. All variants kept."))
-		}
-	}
+        matSubsetObjKept=subsetMaf(maf = matSubsetObj, query = queryExp,includeSyn=TRUE,mafObj=TRUE)
+        if (nrow(matSubsetObj@data)>nrow(matSubsetObjKept@data) | nrow(matSubsetObj@maf.silent)>nrow(matSubsetObjKept@maf.silent)) {
+          temp=subsetMaf(maf = matSubsetObj, query =paste0("!(",queryExp,")") ,includeSyn=TRUE,mafObj=FALSE)
+          mafRemovedTable<-rbind(mafRemovedTable,
+                                 cbind(temp,RemovedQuery=rep(queryExp,nrow(temp)),RemovedTag=rep("HighFrequencyInData",nrow(temp)))
+          )
+        }
+        matSubsetObj=matSubsetObjKept
 
-	matDataSubset<-rbind( matSubsetObj@data,matSubsetObj@maf.silent)
-	write.table(matDataSubset,paste0(tools::file_path_sans_ext(basename(mafFile)),".subset.maf"),sep="\t",quote=FALSE,row.names=FALSE)
+      }
+    } else {
+      print(paste0("variantInSampleMaxPercent defined at ",as.integer(variantInSampleMaxPercent*100),"% but no variant was more than it. All variants kept."))
+    }
+  }
 
-	temp=table(mafRemovedTable$RemovedTag)
-	names(temp)=paste0("Removed: ",names(temp))
-	filterMafSummaryTable=c(totalRecords=(nrow(maf@data)+nrow(maf@maf.silent)),subsetRecords=nrow(matDataSubset),temp)
-	cat("filterMafSummary:\n")
-	print(filterMafSummaryTable)
-	write.table(as.data.frame(filterMafSummaryTable),paste0(tools::file_path_sans_ext(basename(mafFile)),".filterMafSummary.txt"),sep="\t",quote=FALSE,col.names=FALSE)
-	write.table(mafRemovedTable,paste0(tools::file_path_sans_ext(basename(mafFile)),".removed.maf"),sep="\t",quote=FALSE,row.names=FALSE)
+  matDataSubset<-rbind( matSubsetObj@data,matSubsetObj@maf.silent)
+  write.table(matDataSubset,paste0(tools::file_path_sans_ext(basename(mafFile)),".subset.maf"),sep="\t",quote=FALSE,row.names=FALSE)
+
+  temp=table(mafRemovedTable$RemovedTag)
+  names(temp)=paste0("Removed: ",names(temp))
+  filterMafSummaryTable=c(totalRecords=(nrow(maf@data)+nrow(maf@maf.silent)),subsetRecords=nrow(matDataSubset),temp)
+  cat("filterMafSummary:\n")
+  print(filterMafSummaryTable)
+  write.table(as.data.frame(filterMafSummaryTable),paste0(tools::file_path_sans_ext(basename(mafFile)),".filterMafSummary.txt"),sep="\t",quote=FALSE,col.names=FALSE)
+  write.table(mafRemovedTable,paste0(tools::file_path_sans_ext(basename(mafFile)),".removed.maf"),sep="\t",quote=FALSE,row.names=FALSE)
+
+  invisible(matDataSubset)
 }
+
 
 
 

@@ -7,7 +7,7 @@ initialize_maf_report_parameter<-
            reportTemplate=system.file('templates', "report.Rmd", package = 'mafreport'),
            reportModules=c("Initialize.Rmd","SummaryTables.Rmd","VariantsVisualization.Rmd","HighFreqVariantsCheck.Rmd","VariantsAnalysis.Rmd"),
            genome="hg19",
-           vafCol="t_vaf",
+           vafCol=c("t_vaf","tumor_f"),
            vc_nonSyn=c("Frame_Shift_Del", "Frame_Shift_Ins", "Splice_Site", "Translation_Start_Site",
                        "Nonsense_Mutation",	"Nonstop_Mutation",
                        #"In_Frame_Del", "In_Frame_Ins",

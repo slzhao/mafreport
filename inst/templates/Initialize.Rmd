@@ -74,9 +74,13 @@ if (!("performVaf" %in% names(dataForReport)) || dataForReport[["performVaf"]]) 
   caculateVaf=FALSE
   
   if ("vafCol" %in% names(dataForReport)) { #defined vafCol
-     if (!(dataForReport[["vafCol"]] %in% getFields(dataForReport[["maf"]]))) { #defined vafCol NOT in maf data column
+    vafCol=interesct(dataForReport[["vafCol"]],getFields(dataForReport[["maf"]]))
+     if (length(vafCol)==0) { #defined vafCol NOT in maf data column
        message(paste0("Defined vafCol as ",dataForReport[["vafCol"]]," but not found in maf." ))
        caculateVaf=TRUE
+     } else {
+       vafCol=vafCol[1]
+       caculateVaf=FALSE
      }
   } else { #Not defined vafCol
       caculateVaf=TRUE
