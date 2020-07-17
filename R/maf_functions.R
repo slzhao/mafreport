@@ -56,8 +56,20 @@ filterMaf=function(mafFile,
   mafCol=intersect(mafCol,colnames(maf@data))
   if (!is.null(mafMax) & length(mafCol)>0) {
     print(paste0(mafCol))
+    for (i in 1:length(mafCol)) {
+      if (class(matSubsetObj@data[[mafCol[i]]])=="character") {
+        #change maf data type
+        temp=suppressWarnings(sapply(strsplit(matSubsetObj@data[[mafCol[i]]],"\\|"),function(x) min(as.numeric(x))))
+        temp[is.infinite(temp)]=NA
+        matSubsetObj@data[[mafCol[i]]]=temp
+        #change maf.silent data type
+        temp=suppressWarnings(sapply(strsplit(matSubsetObj@maf.silent[[mafCol[i]]],"\\|"),function(x) min(as.numeric(x))))
+        temp[is.infinite(temp)]=NA
+        matSubsetObj@maf.silent[[mafCol[i]]]=temp
+      }
+    }
     temp1=paste0(mafCol,"<",mafMax)
-    temp2=paste0("is.na(",mafCol,")")
+    temp2=paste0("is.na(",mafCol,") | (",mafCol,"=='')")
     temp3=paste0("(",temp1," | ",temp2,")")
     queryExp=paste0("(",paste(temp3,collapse=" & "),")")
   } else {
