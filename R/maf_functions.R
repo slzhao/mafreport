@@ -59,11 +59,11 @@ filterMaf=function(mafFile,
     for (i in 1:length(mafCol)) {
       if (class(matSubsetObj@data[[mafCol[i]]])=="character") {
         #change maf data type
-        temp=suppressWarnings(sapply(strsplit(matSubsetObj@data[[mafCol[i]]],"\\|"),function(x) min(as.numeric(x))))
+        temp=suppressWarnings(sapply(strsplit(matSubsetObj@data[[mafCol[i]]],"\\|"),function(x) max(as.numeric(x))))
         temp[is.infinite(temp)]=NA
         matSubsetObj@data[[mafCol[i]]]=temp
         #change maf.silent data type
-        temp=suppressWarnings(sapply(strsplit(matSubsetObj@maf.silent[[mafCol[i]]],"\\|"),function(x) min(as.numeric(x))))
+        temp=suppressWarnings(sapply(strsplit(matSubsetObj@maf.silent[[mafCol[i]]],"\\|"),function(x) max(as.numeric(x))))
         temp[is.infinite(temp)]=NA
         matSubsetObj@maf.silent[[mafCol[i]]]=temp
       }
