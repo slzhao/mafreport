@@ -4,26 +4,24 @@
 #library(devtools)
 #install_github("slzhao/mafreport")
 
-##################################################
-#load the latest version bydevtools from local
-##################################################
-devtools::load_all("~/source/mafreport")
-#Or load the installed version
-#library(mafreport)
-
 
 ##################################################
 #get OS type to determin if it is on local PC or ACCRE server
 ##################################################
 osInfo=.Platform$OS.type
 if (osInfo=="unix") { #ACCRE
+  #load the latest version by devtools from ACCRE
+  devtools::load_all("~/source/mafreport")
   reportOutDir="/scratch/cqs/zhaos/temp"
 } else if (osInfo=="windows") { #local PC
+  #load the latest version by devtools from local
+  devtools::load_all("d:/source/mafreport")
   reportOutDir="D:\\temp\\"
 } else {
   stop(paste0("Unknown OS type: ",osInfo))
 }
-
+#Or load the installed version
+#library(mafreport)
 
 
 ##################################################
@@ -39,7 +37,7 @@ dataForReport=initialize_maf_report_parameter(mafFile,reportOutDir=reportOutDir,
                                                vafCol="i_TumorVAF_WU",
                                                clinicalData=clinicalData,
                                                clinicalFeatures=clinicalFeatures,
-                                               reportModules=c("Initialize.Rmd"))
+                                               reportModules=c("Initialize.Rmd","SummaryTables.Rmd","VariantsVisualization.Rmd"))
 
 #Example for GATK. Tim's Exome sequence project
 mafFile="/scratch/cqs/baiy7/Tim_proj/IPF_new_WES/analysis/_IPF_new_WES_result_reseq_exLCR/bwa_refine_gatk4_SNV_09_toMAF/result/IPF_new_WES.freq0.001.filtered.tsv.maf"
