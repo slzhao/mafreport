@@ -141,13 +141,17 @@ filterMaf=function(mafFile,
   matDataSubset<-rbind( matSubsetObj@data,matSubsetObj@maf.silent)
   write.table(matDataSubset,paste0(tools::file_path_sans_ext(basename(mafFile)),".subset.maf"),sep="\t",quote=FALSE,row.names=FALSE)
 
-  temp=table(mafRemovedTable$RemovedTag)
-  names(temp)=paste0("Removed: ",names(temp))
-  filterMafSummaryTable=c(totalRecords=(nrow(maf@data)+nrow(maf@maf.silent)),subsetRecords=nrow(matDataSubset),temp)
-  cat("filterMafSummary:\n")
-  print(filterMafSummaryTable)
-  write.table(as.data.frame(filterMafSummaryTable),paste0(tools::file_path_sans_ext(basename(mafFile)),".filterMafSummary.txt"),sep="\t",quote=FALSE,col.names=FALSE)
-  write.table(mafRemovedTable,paste0(tools::file_path_sans_ext(basename(mafFile)),".removed.maf"),sep="\t",quote=FALSE,row.names=FALSE)
+  if (!is.null(mafRemovedTable)) {
+    temp=table(mafRemovedTable$RemovedTag)
+    names(temp)=paste0("Removed: ",names(temp))
+    filterMafSummaryTable=c(totalRecords=(nrow(maf@data)+nrow(maf@maf.silent)),subsetRecords=nrow(matDataSubset),temp)
+    cat("filterMafSummary:\n")
+    print(filterMafSummaryTable)
+    write.table(as.data.frame(filterMafSummaryTable),paste0(tools::file_path_sans_ext(basename(mafFile)),".filterMafSummary.txt"),sep="\t",quote=FALSE,col.names=FALSE)
+    write.table(mafRemovedTable,paste0(tools::file_path_sans_ext(basename(mafFile)),".removed.maf"),sep="\t",quote=FALSE,row.names=FALSE)
+  } else {
+    cat("No variant was removed\n")
+  }
 
   invisible(matDataSubset)
 }
