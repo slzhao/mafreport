@@ -96,8 +96,13 @@ filterMaf=function(mafFile,
 
   print(queryExp)
   #matDataSubset=subsetMaf(maf = dataForReport[["maf"]], query = queryExp,includeSyn=TRUE)
+  #browser()
 
-  matSubsetObjKept=subsetMaf(maf = matSubsetObj, query = queryExp,includeSyn=TRUE,mafObj=TRUE)
+  matSubsetObjKept=try(subsetMaf(maf = matSubsetObj, query = queryExp,includeSyn=TRUE,mafObj=TRUE))
+  if (class(matSubsetObjKept)=="try-error") { #error, empty output for queryExp
+    warning(paste0("All varints removed because of existing in Public Database: ",nrow(maf@data)+nrow(maf@maf.silent)))
+    return()
+  }
   if (nrow(matSubsetObj@data)>nrow(matSubsetObjKept@data) | nrow(matSubsetObj@maf.silent)>nrow(matSubsetObjKept@maf.silent)) {
     temp=subsetMaf(maf = matSubsetObj, query =paste0("!(",queryExp,")") ,includeSyn=TRUE,mafObj=FALSE)
     mafRemovedTable<-rbind(mafRemovedTable,
