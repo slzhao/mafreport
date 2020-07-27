@@ -19,7 +19,7 @@ oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,remo
 ```
 
 <!-- ### VAF -->
-```{r}
+```{r,fig.width=9,fig.height=9}
 if (dataForReport[["performVaf"]]) {
   cat("### VAF\n")
 #  plotVaf(maf = dataForReport[["maf"]], vafCol = dataForReport[["vafCol"]])
