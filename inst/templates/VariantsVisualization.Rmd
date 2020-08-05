@@ -8,7 +8,7 @@ plotmafSummary(maf = dataForReport[["maf"]], rmOutlier = TRUE, addStat = 'median
 
 ## Variant Level
 ### Oncoplots
-```{r,fig.width=9,fig.height=9}
+```{r,fig.width=11,fig.height=11}
 clinicalFeatures=dataForReport[["clinicalFeatures"]]
 clinicalFeaturesSize=length(unique(unlist(dataForReport[["mafProcessed"]]$variantMafOncoPlot@data[,..clinicalFeatures])))
 if (clinicalFeaturesSize>99) {
@@ -19,7 +19,7 @@ oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,remo
 ```
 
 <!-- ### VAF -->
-```{r,fig.width=9,fig.height=9}
+```{r,fig.width=7,fig.height=7}
 if (dataForReport[["performVaf"]]) {
   cat("### VAF\n")
 #  plotVaf(maf = dataForReport[["maf"]], vafCol = dataForReport[["vafCol"]])
