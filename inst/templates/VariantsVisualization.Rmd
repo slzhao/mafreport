@@ -15,7 +15,7 @@ if (clinicalFeaturesSize>99) {
   print(paste0("clinicalFeature ",paste(clinicalFeatures,collapse=", ")," has too many groups. Reduce it to less than 99 groups for Oncoplots"))
   clinicalFeatures=NULL
 }
-oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeatures,barcode_mar=9,gene_mar=11)
+try(oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeatures,barcode_mar=9,gene_mar=11))
 ```
 
 <!-- ### VAF -->
@@ -67,13 +67,13 @@ if (clinicalFeaturesSize>99) {
     print(paste0("clinicalFeature ",paste(clinicalFeatures,collapse=", ")," has too many groups. Reduce it to less than 99 groups for Oncoplots and Oncostrip"))
   clinicalFeatures=NULL
 }
-oncoplot(maf = dataForReport[["maf"]], top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeatures,barcode_mar=9)
+try(oncoplot(maf = dataForReport[["maf"]], top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeatures,barcode_mar=9))
 ```
 
 ### Oncostrip
 
 ```{r,fig.width=9}
-oncostrip(maf = dataForReport[["maf"]], top=10,genes=dataForReport[["interestedGenes"]],removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeatures,barcode_mar=9)
+try(oncostrip(maf = dataForReport[["maf"]], top=10,genes=dataForReport[["interestedGenes"]],removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeatures,barcode_mar=9))
 ```
 
 <!-- ### VAF -->
