@@ -1,6 +1,13 @@
 
 # Group/Family summary
 
+```{r}
+clinicalData=getClinicalData(dataForReport$maf)
+makeDataTable(clinicalData)
+```
+
+
+
 Top 200 variants/genes will be listed in the tables:
 
 <!-- ## Variants in Family/Group -->
@@ -162,7 +169,7 @@ for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
 ```{r,fig.width=9,fig.height=9,warning=FALSE}
 #test
 testEachGroup=function(x,groups,test=wilcox.test) {
-  uniqueGroups=unique(groups)
+  uniqueGroups=unique(na.omit(groups))
   
   resultAll=NULL
   for (i in 1:(length(uniqueGroups)-1)) {
