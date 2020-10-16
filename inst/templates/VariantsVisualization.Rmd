@@ -15,8 +15,9 @@ if (clinicalFeaturesSize>99) {
   print(paste0("clinicalFeature ",paste(clinicalFeatures,collapse=", ")," has too many groups. Reduce it to less than 99 groups for Oncoplots"))
   clinicalFeatures=NULL
 }
-try(oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeatures,barcode_mar=9,gene_mar=11))
-```
+
+oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeatures,barcode_mar=9,gene_mar=9)
+
 
 <!-- ### VAF -->
 ```{r,fig.width=7,fig.height=7}
@@ -55,7 +56,7 @@ mafMutload = tcgaCompare(maf = dataForReport[["maf"]])
 
 ## Gene Level
 ### Genecloud
-```{r}
+```{r,eval=FALSE}
 suppressWarnings(geneCloud(input = dataForReport[["maf"]], top = 15))
 ```
 
