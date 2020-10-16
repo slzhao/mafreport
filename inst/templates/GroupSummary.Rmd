@@ -76,7 +76,7 @@ cat("\n")
 
 ## Oncoplots about variants, sort by Family/Group
 
-```{r,fig.width=9,fig.height=9}
+```{r,fig.width=11,fig.height=11}
 for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
   clinicalFeaturesOneGroups=table((dataForReport[["mafProcessed"]]$variantMafOncoPlot@data[,..clinicalFeaturesOne]))
   clinicalFeaturesOneSize=length(which(clinicalFeaturesOneGroups>0))
@@ -85,7 +85,7 @@ for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
   }
   if (clinicalFeaturesOneSize<=99) {
     plot.new()
-    oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeaturesOne,sortByAnnotation=TRUE)
+    oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeaturesOne,sortByAnnotation=TRUE,barcode_mar=9,gene_mar=11)
   } else {
     print(paste0("clinicalFeature ",clinicalFeaturesOne," has too many groups: ",clinicalFeaturesOneSize, ". Reduce it to less than 99 for Oncoplots"))
   }
@@ -151,12 +151,12 @@ if (!is.null(dataForReport[["clinicalFeatures"]][1])) {
 
 ## Oncoplots about Genes, sort by Family/Group
   
-```{r,fig.width=9,fig.height=9}
+```{r,fig.width=11,fig.height=11}
 for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
   clinicalFeaturesOneSize=length(table((dataForReport[["maf"]]@data[,..clinicalFeaturesOne])))
   if (clinicalFeaturesOneSize<=99) {
   plot.new()
-  oncoplot(maf = dataForReport[["maf"]], top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeaturesOne,sortByAnnotation=TRUE)
+  oncoplot(maf = dataForReport[["maf"]], top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeaturesOne,sortByAnnotation=TRUE,barcode_mar=9,gene_mar=9)
   } else {
     print(paste0("clinicalFeature ",clinicalFeaturesOne," has too many groups: ",clinicalFeaturesOneSize, ". Reduce it to less than 99 for Oncoplots"))
   }
@@ -166,7 +166,7 @@ for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
 
 ## Mutation burden by Family/Group
 
-```{r,fig.width=9,fig.height=9,warning=FALSE}
+```{r,fig.width=6,fig.height=6,fig.align="center",warning=FALSE}
 #test
 testEachGroup=function(x,groups,test=wilcox.test) {
   uniqueGroups=unique(na.omit(groups))
@@ -201,7 +201,8 @@ for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
         p=ggplot(dataForPlot)+geom_boxplot(aes_string(x=clinicalFeaturesOne,y=varType))+ggtitle(varType)
         plot(p)
         result=testEachGroup(dataForPlot[[varType]],as.character(dataForPlot[[clinicalFeaturesOne]]),test=wilcox.test)
-        knitr::kable(result,caption = paste0("Number of ",varType," mutations Comparison by Wilcox Rank Sum test"))
+        print(knitr::kable(result,caption = paste0("Number of ",varType," mutations Comparison by Wilcox Rank Sum test")))
+        cat("\n\n")
     }
   }
 
