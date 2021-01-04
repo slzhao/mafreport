@@ -17,9 +17,10 @@ if (clinicalFeaturesSize>99) {
 }
 
 oncoplot(maf = dataForReport[["mafProcessed"]]$variantMafOncoPlot, top = 10,removeNonMutated=FALSE,showTumorSampleBarcodes=TRUE,clinicalFeatures=clinicalFeatures,barcode_mar=9,gene_mar=9)
-
+```
 
 <!-- ### VAF -->
+  
 ```{r,fig.width=7,fig.height=7}
 if (dataForReport[["performVaf"]]) {
   cat("### VAF\n")

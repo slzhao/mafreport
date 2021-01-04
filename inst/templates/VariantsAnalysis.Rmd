@@ -9,12 +9,15 @@ try(somaticInteractions(maf = dataForReport[["maf"]], top = 10,genes=dataForRepo
 ```{r,results='hide'}
 if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
   cat("## Detecting cancer driver genes based on positional clustering\n")
-  mafOncodrive = oncodrive(maf = dataForReport[["maf"]], AACol = dataForReport[["AACol"]], minMut = 5, pvalMethod = 'zscore')
+  mafOncodrive = try(oncodrive(maf = dataForReport[["maf"]], AACol = dataForReport[["AACol"]], minMut = 5, pvalMethod = 'zscore'))
 }
 ```
 
 ```{r}
-if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
+if (class(mafOncodrive)=="try-error") { #error in oncodrive, usually because of not enough genes with many mutations, can change minMut to smaller value.
+  
+} else {
+  if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
   makeDataTable(mafOncodrive[,c("Hugo_Symbol",setdiff(colnames(mafOncodrive),colnames(dataForReport[["maf"]]@gene.summary))),with = FALSE])
   
   fdrCut=max(sort(mafOncodrive$fdr)[5]+0.00000001,0.05) #make sure fdrCut can include at least 5 points for plot
@@ -29,8 +32,9 @@ if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
   if (0) { #Too slow now. Not to do plot at this time
     plotOncodrive(res = mafOncodrive[plotInd,], fdrCutOff = fdrCut, useFraction = TRUE)
   }
-  
+  }
 }
+
 ```
 
 <!-- ## Summarizing pfam domains -->
