@@ -1,3 +1,11 @@
+CHANGES IN VERSION 0.3.1 2021-01-14
+------------------------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o Work with all other package updates in R 4.0.0.
+    o Add pathway analysis by webgestaltR.
+
 CHANGES IN VERSION 0.2.2 2020-07-11
 ------------------------------------
 

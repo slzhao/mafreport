@@ -1,0 +1,130 @@
+
+# Function Enrichment Analysis: GO and KEGG
+
+```{r,echo=FALSE}
+  enrichDatabases<-c(
+                     #"geneontology_Biological_Process",
+                     #"geneontology_Cellular_Component",
+                     #"geneontology_Molecular_Function",
+                     "geneontology_Biological_Process_noRedundant",
+                     "geneontology_Cellular_Component_noRedundant",
+                     "geneontology_Molecular_Function_noRedundant",
+                     "pathway_KEGG"
+                     #"pathway_Wikipathway",
+                     #"network_miRNA_target",
+                     #"network_PPI_BIOGRID",
+                     #"network_Transcription_Factor_target"
+  )
+  if(dataForReport[["genome"]]=="mm10" || dataForReport[["genome"]]=="mm9") { #only support mouse and human at this time
+    organism="mmusculus"
+  }  else if(dataForReport[["genome"]]=="hg19" || dataForReport[["genome"]]=="hg38") {
+    organism="hsapiens"
+  } else {
+    stop(paste0("Not supporting this genome to run WebGestaltR: ", dataForReport[["genome"]]))
+  }
+  projectName=basename(dataForReport[["reportOut"]])
+```
+
+
+
+```{r,results='asis',echo=FALSE,message=FALSE}
+if ("performFunctionEnrichmentAnalysis" %in% names(dataForReport) && dataForReport[["performFunctionEnrichmentAnalysis"]]) {
+  cat(paste0("\n## All genes with mutations\n\n  "))
+  
+  mutationGenes = unique(dataForReport$maf@data$Hugo_Symbol)
+  
+  WebGestaltResult = list()
+  
+  for (enrichDatabase in enrichDatabases) {
+    WebGestaltResult[[enrichDatabase]] = WebGestaltR(
+      enrichMethod = "ORA",
+      organism = organism,
+      enrichDatabase = enrichDatabase,
+      interestGene = mutationGenes,
+      interestGeneType = "genesymbol",
+      referenceSet = "genome_protein-coding",
+      isOutput = FALSE,
+      #outputDirectory=outputDirectory,
+      projectName = projectName
+    )
+  }
+  
+  out = list()
+  for (i in seq_along(WebGestaltResult)) {
+    temp = head(WebGestaltResult[[i]][, c(1, 2, 4, 5, 8, 9)], 30)
+    temp[, 5] = formatC(temp[, 5], format = "e", digits = 2)
+    temp[, 6] = formatC(temp[, 6], format = "e", digits = 2)
+    out <- append(out, list(tags$h3(paste0(
+      names(WebGestaltResult)[i]
+    ))))
+    out <- append(out, list(makeDataTable(temp)))
+  }
+  print(tagList(out))
+  
+}
+
+```
+
+
+
+
+```{r,results='asis',echo=FALSE,message=FALSE}
+
+#Genes with mutations in each group
+if ("performFunctionEnrichmentAnalysis" %in% names(dataForReport) && 
+    dataForReport[["performFunctionEnrichmentAnalysis"]] &&
+    "performGroupSummary" %in% names(dataForReport) &&
+    dataForReport$performGroupSummary) {
+  cat(paste0("\n## Genes with mutations in each group\n\n  "))
+  
+  maf = dataForReport[["maf"]]@data
+
+  for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
+    for (groupOne in unique(as.character(maf[[clinicalFeaturesOne]]))) {
+      mutationGenes = unique(maf$Hugo_Symbol[which(maf[[clinicalFeaturesOne]] ==
+                                                     groupOne)])
+      if (length(mutationGenes) <= 50) {
+        warning(
+          paste0(
+            "Too few mutation genes. Skip function enrichment analysis for ",
+            clinicalFeaturesOne,
+            ": ",
+            groupOne
+          )
+        )
+        next
+      }
+      
+      cat(paste0("\n### ",clinicalFeaturesOne,": ",groupOne,"\n\n  "))
+      WebGestaltResult = list()
+      for (enrichDatabase in enrichDatabases) {
+        WebGestaltResult[[enrichDatabase]] = WebGestaltR(
+          enrichMethod = "ORA",
+          organism = organism,
+          enrichDatabase = enrichDatabase,
+          interestGene = mutationGenes,
+          interestGeneType = "genesymbol",
+          referenceSet = "genome_protein-coding",
+          isOutput = FALSE,
+          #outputDirectory=outputDirectory,
+          projectName = projectName,
+          minNum=5
+        )
+      }
+      out = list()
+      for (i in seq_along(WebGestaltResult)) {
+        temp = head(WebGestaltResult[[i]][, c(1, 2, 4, 5, 8, 9)], 30)
+        temp[, 5] = formatC(temp[, 5], format = "e", digits = 2)
+        temp[, 6] = formatC(temp[, 6], format = "e", digits = 2)
+        out <-
+          append(out, list(tags$h4(paste0(
+            names(WebGestaltResult)[i]
+          ))))
+        out <- append(out, list(makeDataTable(temp)))
+      }
+      print(tagList(out))
+    }
+  }
+}
+
+```

@@ -5,7 +5,8 @@ initialize_maf_report_parameter<-
            reportOut=paste0(basename(mafFile),".report.html"),
            reportOutDir=dirname(mafFile),
            reportTemplate=system.file('templates', "report.Rmd", package = 'mafreport'),
-           reportModules=c("Initialize.Rmd","SummaryTables.Rmd","VariantsVisualization.Rmd","HighFreqVariantsCheck.Rmd","VariantsAnalysis.Rmd"),
+           reportModules=c("Initialize.Rmd","SummaryTables.Rmd","VariantsVisualization.Rmd",
+                           "HighFreqVariantsCheck.Rmd","VariantsAnalysis.Rmd","FunctionEnrichmentAnalysis.Rmd"),
            genome="hg19",
            vafCol=c("t_vaf","tumor_f"),
            vc_nonSyn=c("Frame_Shift_Del", "Frame_Shift_Ins", "Splice_Site", "Translation_Start_Site",
@@ -17,6 +18,7 @@ initialize_maf_report_parameter<-
            clinicalData=NULL,
            clinicalFeatures=NULL,
            performGroupSummary=NULL,
+           performFunctionEnrichmentAnalysis=NULL,
            showCode=TRUE
            ) {
 
@@ -34,6 +36,7 @@ initialize_maf_report_parameter<-
   dataForReport[["clinicalData"]]=clinicalData
   dataForReport[["clinicalFeatures"]]=clinicalFeatures
   dataForReport[["performGroupSummary"]]=performGroupSummary
+  dataForReport[["performFunctionEnrichmentAnalysis"]]=performFunctionEnrichmentAnalysis
   dataForReport[["showCode"]]=showCode
 
   # checkAndAddParameter=function(dataForReport,ParameterName,defaultValue) {

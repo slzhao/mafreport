@@ -2,6 +2,7 @@
 #' @import GenomicRanges
 #' @import dndscv
 #' @import GenomeInfoDb
+#' @import WebGestaltR
 #' @importMethodsFrom GenomicRanges reduce
 usethis::use_package("data.table","Depends")
 usethis::use_package("maftools","Depends")

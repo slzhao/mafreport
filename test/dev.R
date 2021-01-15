@@ -37,7 +37,9 @@ dataForReport=initialize_maf_report_parameter(mafFile,reportOutDir=reportOutDir,
                                                vafCol="i_TumorVAF_WU",
                                                clinicalData=clinicalData,
                                                clinicalFeatures=clinicalFeatures,
-                                               reportModules=c("Initialize.Rmd","SummaryTables.Rmd","VariantsVisualization.Rmd"))
+                                               performFunctionEnrichmentAnalysis = TRUE,
+                                               reportModules=c("Initialize.Rmd","SummaryTables.Rmd",
+                                                               "VariantsVisualization.Rmd","FunctionEnrichmentAnalysis.Rmd"))
 
 #Example for GATK. Tim's Exome sequence project
 mafFile="/scratch/cqs/baiy7/Tim_proj/IPF_new_WES/analysis/_IPF_new_WES_result_reseq_exLCR/bwa_refine_gatk4_SNV_09_toMAF/result/IPF_new_WES.freq0.001.filtered.tsv.maf"
