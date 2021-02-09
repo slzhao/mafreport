@@ -22,7 +22,11 @@
   } else {
     stop(paste0("Not supporting this genome to run WebGestaltR: ", dataForReport[["genome"]]))
   }
-  projectName=basename(dataForReport[["reportOut"]])
+  projectName=WebGestaltR:::sanitizeFileName(basename(dataForReport[["reportOut"]]))
+  selectedColumns=c("Tumor_Sample_Barcode",dataForReport$vIdCol,dataForReport$vafCol)
+  functionEnrichResultDir=paste0(dataForReport$reportOutDir,"/FunctionEnrichmentAnalysis")
+  dir.create(functionEnrichResultDir,showWarnings=FALSE)
+
 ```
 
 
@@ -31,39 +35,38 @@
 if ("performFunctionEnrichmentAnalysis" %in% names(dataForReport) && dataForReport[["performFunctionEnrichmentAnalysis"]]) {
   cat(paste0("\n## All genes with mutations\n\n  "))
   
-  mutationGenes = unique(dataForReport$maf@data$Hugo_Symbol)
+  mafNoSynSelectedColumns=dataForReport$maf@data[,..selectedColumns]
+  geneFile=paste0(functionEnrichResultDir,"/",projectName,".mafNoSynSelectedColumns.maf")
+  write.table(mafNoSynSelectedColumns,geneFile,sep="\t",row.names=FALSE,quote=FALSE)
   
-  WebGestaltResult = list()
-  
-  for (enrichDatabase in enrichDatabases) {
-    WebGestaltResult[[enrichDatabase]] = WebGestaltR(
-      enrichMethod = "ORA",
-      organism = organism,
-      enrichDatabase = enrichDatabase,
-      interestGene = mutationGenes,
-      interestGeneType = "genesymbol",
-      referenceSet = "genome_protein-coding",
-      isOutput = FALSE,
-      #outputDirectory=outputDirectory,
-      projectName = projectName
-    )
-  }
-  
-  out = list()
-  for (i in seq_along(WebGestaltResult)) {
-    temp = head(WebGestaltResult[[i]][, c(1, 2, 4, 5, 8, 9)], 30)
-    temp[, 5] = formatC(temp[, 5], format = "e", digits = 2)
-    temp[, 6] = formatC(temp[, 6], format = "e", digits = 2)
-    out <- append(out, list(tags$h3(paste0(
-      names(WebGestaltResult)[i]
-    ))))
-    out <- append(out, list(makeDataTable(temp)))
-  }
-  print(tagList(out))
-  
+  #pass parameters in by redefine commandArgs. https://stackoverflow.com/questions/14525580/how-to-pass-command-line-arguments-when-calling-source-on-an-r-file-within-ano
+  commandArgs <- function(...) {c(organism,projectName,geneFile,functionEnrichResultDir,"genesymbol","genome")}
+  source("~/source/ngsperl/lib/Annotation/WebGestaltR.r")
+  rm(commandArgs) #del new to restore orginal commandArgs
 }
+```
+
+
+
+```{r,results='asis',echo=FALSE,message=FALSE}
+annotationResultFiles=paste0(functionEnrichResultDir,"/Project_",projectName,"_",enrichDatabases,"/enrichment_results_",projectName,"_",enrichDatabases,".txt")
+annoFiles=data.frame(V1=annotationResultFiles,V2=projectName)
+deseq2Files=data.frame(V1=geneFile,V2=projectName)
+
+oldwd=getwd()
+setwd(functionEnrichResultDir)
+file.copy("~/source/ngsperl/lib/Annotation/WebGestaltDeseq2.rmd","WebGestaltDeseq2.rmd")
+source("~/source/ngsperl/lib/Annotation/WebGestaltDeseq2.r")
+setwd(oldwd)
 
 ```
+
+
+
+
+
+
+
 
 
 
@@ -77,54 +80,52 @@ if ("performFunctionEnrichmentAnalysis" %in% names(dataForReport) &&
     dataForReport$performGroupSummary) {
   cat(paste0("\n## Genes with mutations in each group\n\n  "))
   
-  maf = dataForReport[["maf"]]@data
-
   for (clinicalFeaturesOne in dataForReport[["clinicalFeatures"]]) {
-    for (groupOne in unique(as.character(maf[[clinicalFeaturesOne]]))) {
-      mutationGenes = unique(maf$Hugo_Symbol[which(maf[[clinicalFeaturesOne]] ==
-                                                     groupOne)])
-      if (length(mutationGenes) <= 50) {
-        warning(
-          paste0(
-            "Too few mutation genes. Skip function enrichment analysis for ",
-            clinicalFeaturesOne,
-            ": ",
-            groupOne
+    for (groupOne in unique(as.character(dataForReport[["maf"]]@data[[clinicalFeaturesOne]]))) {
+        clinQueryText=paste0(clinicalFeaturesOne," %in% '",groupOne,"'")
+        mafGroupOne = subsetMaf(maf = dataForReport[["maf"]], clinQuery = clinQueryText)
+        
+        mutationGenes=unique(mafGroupOne@data[["Hugo_Symbol"]])
+        if (length(mutationGenes) <= 50) {
+          warning(paste0("Too few mutation genes. Skip function enrichment analysis for ",clinicalFeaturesOne,": ",groupOne
           )
         )
         next
-      }
-      
+        }
       cat(paste0("\n### ",clinicalFeaturesOne,": ",groupOne,"\n\n  "))
-      WebGestaltResult = list()
-      for (enrichDatabase in enrichDatabases) {
-        WebGestaltResult[[enrichDatabase]] = WebGestaltR(
-          enrichMethod = "ORA",
-          organism = organism,
-          enrichDatabase = enrichDatabase,
-          interestGene = mutationGenes,
-          interestGeneType = "genesymbol",
-          referenceSet = "genome_protein-coding",
-          isOutput = FALSE,
-          #outputDirectory=outputDirectory,
-          projectName = projectName,
-          minNum=5
-        )
-      }
-      out = list()
-      for (i in seq_along(WebGestaltResult)) {
-        temp = head(WebGestaltResult[[i]][, c(1, 2, 4, 5, 8, 9)], 30)
-        temp[, 5] = formatC(temp[, 5], format = "e", digits = 2)
-        temp[, 6] = formatC(temp[, 6], format = "e", digits = 2)
-        out <-
-          append(out, list(tags$h4(paste0(
-            names(WebGestaltResult)[i]
-          ))))
-        out <- append(out, list(makeDataTable(temp)))
-      }
-      print(tagList(out))
+      
+      ##########################
+      #do annotation
+      ##########################
+      mafNoSynSelectedColumns=mafGroupOne@data[,..selectedColumns]
+      projectNameGroup=paste0(projectName,"_",clinicalFeaturesOne,"_",groupOne)
+      geneFile=paste0(functionEnrichResultDir,"/",projectNameGroup,".mafNoSynSelectedColumns.maf")
+      write.table(mafNoSynSelectedColumns,geneFile,sep="\t",row.names=FALSE,quote=FALSE)
+  
+      #pass parameters in by redefine commandArgs. https://stackoverflow.com/questions/14525580/how-to-pass-command-line-arguments-when-calling-source-on-an-r-file-within-ano
+      commandArgs <- function(...) {c(organism,projectNameGroup,geneFile,functionEnrichResultDir,"genesymbol","genome")}
+      source("~/source/ngsperl/lib/Annotation/WebGestaltR.r")
+      rm(commandArgs) #del new to restore orginal commandArgs
+      
+      #################################
+      #make tables
+      #################################
+      annotationResultFiles=paste0(functionEnrichResultDir,"/Project_",projectNameGroup,"_",enrichDatabases,"/enrichment_results_",projectNameGroup,"_",enrichDatabases,".txt")
+      annoFiles=data.frame(V1=annotationResultFiles,V2=projectNameGroup)
+      deseq2Files=data.frame(V1=geneFile,V2=projectNameGroup)
+
+      oldwd=getwd()
+      setwd(functionEnrichResultDir)
+      file.copy("~/source/ngsperl/lib/Annotation/WebGestaltDeseq2.rmd","WebGestaltDeseq2.rmd",overwrite = TRUE)
+      source("~/source/ngsperl/lib/Annotation/WebGestaltDeseq2.r")
+      setwd(oldwd)
+
     }
   }
+  
 }
 
 ```
+
+
+
