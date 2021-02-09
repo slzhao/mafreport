@@ -129,29 +129,33 @@ library('NMF')
 #try(plotSignatures(mafTnmSign, title_size = 1 ,yaxisLim=NA))
 
 #with R4.0
-mafTnmSign = estimateSignatures(mat = mafTnm, nTry = 6)
+mafTnmSign = try(estimateSignatures(mat = mafTnm, nTry = 6))
 #mafTnmSign = estimateSignatures(mat = mafTnm, nTry = 6, pConstant = 0.1, plotBestFitRes = FALSE, parallel = 2)
 #plotCophenetic(res = mafTnmSign)
-mafTnmSign = extractSignatures(mat = mafTnm, n = 5)
+mafTnmSign = try(extractSignatures(mat = mafTnm, n = 5))
 
-#Compate against original 30 signatures 
-mafTnmSign.og30.cosm = compareSignatures(nmfRes = mafTnmSign, sig_db = "legacy")
-#Compate against updated version3 60 signatures 
-mafTnmSign.v3.cosm = compareSignatures(nmfRes = mafTnmSign, sig_db = "SBS")
+if (class(mafTnmSign)!="try-error") {
+  #Compate against original 30 signatures 
+  mafTnmSign.og30.cosm = compareSignatures(nmfRes = mafTnmSign, sig_db = "legacy")
+  #Compate against updated version3 60 signatures 
+  mafTnmSign.v3.cosm = compareSignatures(nmfRes = mafTnmSign, sig_db = "SBS")
 
-library('pheatmap')
-pheatmap::pheatmap(mat = mafTnmSign.v3.cosm$cosine_similarities, cluster_rows = FALSE, main = "cosine similarity against validated signatures")
+  library('pheatmap')
+  pheatmap::pheatmap(mat = mafTnmSign.v3.cosm$cosine_similarities, cluster_rows = FALSE, main = "cosine similarity against validated signatures")
 
-## ---- fig.width=6, fig.height=4, fig.align='center', eval = T-----------------
-maftools::plotSignatures(nmfRes = mafTnmSign, title_size = 1.2, sig_db = "SBS")
+  ## ---- fig.width=6, fig.height=4, fig.align='center', eval = T-----------------
+  maftools::plotSignatures(nmfRes = mafTnmSign, title_size = 1.2, sig_db = "SBS")
 
-#plot contribution to each sample
-library(reshape2)
-library(ggplot2)
+  #plot contribution to each sample
+  library(reshape2)
+  library(ggplot2)
 
-dataForPlot=melt(mafTnmSign$contributions)
-colnames(dataForPlot)=c("Signature","Sample","Contribution")
-ggplot(dataForPlot,aes(x=Sample,y=Contribution,fill=Signature))+geom_bar(stat = "identity")+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  dataForPlot=reshape2::melt(mafTnmSign$contributions)
+  colnames(dataForPlot)=c("Signature","Sample","Contribution")
+  plot(ggplot(dataForPlot,aes(x=Sample,y=Contribution,fill=Signature))+geom_bar(stat = "identity")+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)))
+
+}
+
 
 
 
