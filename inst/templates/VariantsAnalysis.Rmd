@@ -210,6 +210,62 @@ if (!is.null(dataForReport[["dndscv.refdb"]])) {  #have to be in a seprate secti
 ```
 
 
+## sciClone
+
+```{r sciClone,eval=FALSE}
+
+mafObj=dataForReport[["maf"]]
+vafCol=dataForReport$vafCol
+sciCloneResultDir=paste0(dataForReport$reportOutDir,"/sciClone/")
+dir.create(sciCloneResultDir)
+
+colToExtract=c("Chromosome","Start_Position","t_ref_count","t_alt_count",vafCol,"Tumor_Sample_Barcode")
+
+##chr, pos, ref_reads, var_reads, vaf
+mutationTableAll=rbind(mafObj@data[Variant_Type=="SNP"][,..colToExtract],mafObj@maf.silent[Variant_Type=="SNP"][,..colToExtract])
+mutationTableAll$tumor_f=mutationTableAll$tumor_f*100   #VAF is 0 -100 in sciClone
+mutationTableAll=as.data.frame(mutationTableAll)
+mutationTableAll$Tumor_Sample_Barcode=as.character(mutationTableAll$Tumor_Sample_Barcode)
 
 
+library(sciClone)
 
+#allsamples run sciClone one by one
+for (sampleOne in unique(mutationTableAll$Tumor_Sample_Barcode)) {
+  vafInpuTable=mutationTableAll[which(mutationTableAll$Tumor_Sample_Barcode==sampleOne),head(colToExtract,5)]
+  sc = try(sciClone(vafs=vafInpuTable,
+              #minimumDepth=50,
+              sampleNames=sampleOne,
+              #cnCallsAreLog2=TRUE,
+              maximumClusters=6))
+  if (is.null(sc)) { #error
+    next
+  }
+  sciCloneOutput=paste0(sciCloneResultDir,sampleOne,".sciClone")
+  
+  writeClusterTable(sc, paste0(sciCloneOutput,".txt"))
+  sc.plot1d(sc,paste0(sciCloneOutput,".clusterVis1D.pdf"))
+}
+
+
+#summary results
+sciCloneResultFiles=list.files(sciCloneResultDir,pattern=".sciClone.txt$")
+sciCloneResultSummary=NULL
+for (sciCloneResultFile in sciCloneResultFiles) {
+  sampleName=gsub(".sciClone.txt$","",sciCloneResultFile)
+  sciCloneResultTable=read.delim(paste0(sciCloneResultDir,sciCloneResultFile),header=T,as.is=T)
+  
+  totalMutationN=nrow(sciCloneResultTable)
+  totalClusterN=max(sciCloneResultTable$cluster,na.rm = TRUE)
+  totalMutationNInCluster=table(sciCloneResultTable$cluster)
+  totalMutationNInCluster=totalMutationNInCluster[which(names(totalMutationNInCluster)!=0)] #cluster 0 is outlier
+  totalMutationNInCluster=paste(totalMutationNInCluster,collapse=";")
+  
+  sciCloneResultSummary=rbind(sciCloneResultSummary,c(sampleName,totalMutationN,totalClusterN,totalMutationNInCluster))
+}
+colnames(sciCloneResultSummary)=c("Sample","TotalVariants","TotalCluster","VariantsInEachCluster")
+
+write.csv(sciCloneResultSummary, paste0(sciCloneResultDir,"sciCloneResultSummary.csv"),row.names=FALSE)
+
+
+```
