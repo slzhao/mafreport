@@ -49,16 +49,18 @@ if ("performFunctionEnrichmentAnalysis" %in% names(dataForReport) && dataForRepo
 
 
 ```{r,results='asis',echo=FALSE,message=FALSE}
-annotationResultFiles=paste0(functionEnrichResultDir,"/Project_",projectName,"_",enrichDatabases,"/enrichment_results_",projectName,"_",enrichDatabases,".txt")
-annoFiles=data.frame(V1=annotationResultFiles,V2=projectName)
-deseq2Files=data.frame(V1=geneFile,V2=projectName)
+if ("performFunctionEnrichmentAnalysis" %in% names(dataForReport) && dataForReport[["performFunctionEnrichmentAnalysis"]]) {
 
-oldwd=getwd()
-setwd(functionEnrichResultDir)
-file.copy("~/source/ngsperl/lib/Annotation/WebGestaltDeseq2.rmd","WebGestaltDeseq2.rmd")
-source("~/source/ngsperl/lib/Annotation/WebGestaltDeseq2.r")
-setwd(oldwd)
+  annotationResultFiles=paste0(functionEnrichResultDir,"/Project_",projectName,"_",enrichDatabases,"/enrichment_results_",projectName,"_",enrichDatabases,".txt")
+  annoFiles=data.frame(V1=annotationResultFiles,V2=projectName)
+  deseq2Files=data.frame(V1=geneFile,V2=projectName)
 
+  oldwd=getwd()
+  setwd(functionEnrichResultDir)
+  file.copy("~/source/ngsperl/lib/Annotation/WebGestaltDeseq2.rmd","WebGestaltDeseq2.rmd")
+  source("~/source/ngsperl/lib/Annotation/WebGestaltDeseq2.r")
+  setwd(oldwd)
+}
 ```
 
 
