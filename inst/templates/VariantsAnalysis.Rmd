@@ -14,7 +14,7 @@ if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
 ```
 
 ```{r}
-if (class(mafOncodrive)=="try-error") { #error in oncodrive, usually because of not enough genes with many mutations, can change minMut to smaller value.
+if (class(mafOncodrive)[1]=="try-error") { #error in oncodrive, usually because of not enough genes with many mutations, can change minMut to smaller value.
   
 } else {
   if (dataForReport[["genome"]] %in% c("hg18","hg19","hg38")) {
@@ -134,7 +134,7 @@ mafTnmSign = try(estimateSignatures(mat = mafTnm, nTry = 6))
 #plotCophenetic(res = mafTnmSign)
 mafTnmSign = try(extractSignatures(mat = mafTnm, n = 5))
 
-if (class(mafTnmSign)!="try-error") {
+if (class(mafTnmSign)[1]!="try-error") {
   #Compate against original 30 signatures 
   mafTnmSign.og30.cosm = compareSignatures(nmfRes = mafTnmSign, sig_db = "legacy")
   #Compate against updated version3 60 signatures 
@@ -195,7 +195,7 @@ if (!is.null(dataForReport[["dndscv.refdb"]])) {
   dndsout=try(dndscv::dndscv(dataForModel,cv=NULL,refdb=dataForReport[["dndscv.refdb"]],use_indel_sites=FALSE))
   #print(names(dndsout))
   
-  if (class(dndsout)!="try-error") {
+  if (class(dndsout)[1]!="try-error") {
     makeDataTable(dndsout$sel_cv[1:500,])
   }
   
@@ -203,7 +203,7 @@ if (!is.null(dataForReport[["dndscv.refdb"]])) {
 }
 
 if (!is.null(dataForReport[["dndscv.refdb"]])) {  #have to be in a seprate section to make sure makeDataTable(dndsout$sel_cv[1:500,]) can display
-  if (class(dndsout)!="try-error") {
+  if (class(dndsout)[1]!="try-error") {
     kable(dndsout$globaldnds,row.names=FALSE)
   }
 }
