@@ -40,7 +40,7 @@ for (i in 1:length(highFreqGenes)) {
 #  i=1
   #Lollipop plots
   if (highFreqGenes[i] %in% interestedGenesInDb) {
-      try(p=lollipopPlot(maf = dataForReport[["maf"]], gene=highFreqGenes[i], AACol = dataForReport[["AACol"]], showMutationRate = TRUE))
+      p=try(lollipopPlot(maf = dataForReport[["maf"]], gene=highFreqGenes[i], AACol = dataForReport[["AACol"]], showMutationRate = TRUE))
       print(p)
   }
 
